@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solve - MiniForce</title>
+  <link rel="stylesheet" href="miniforce.css">
+</head>
+<body class="workspace-body">
+  <nav>
+    <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+    <div class="nav-links">
+      <a class="active" href="problems.html">Problems</a>
+      <a href="contests.html">Contests</a>
+      <a href="discuss.html">Discuss</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <div class="nav-buttons">
+      <a class="btn-outline" href="login.html">Log In</a>
+      <a class="btn-fill" href="signup.html">Sign Up</a>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <section class="problem-pane">
+      <a class="back-link" href="problems.html">&larr; All problems</a>
+      <div class="workspace-title-row">
+        <h1 id="workspace-title">Two Sum</h1>
+        <span id="workspace-difficulty" class="tag easy">Easy</span>
+      </div>
+      <p id="workspace-topics" class="workspace-topics">Array &bull; Hash Table</p>
+      <h2>Problem statement</h2>
+      <p id="workspace-prompt"></p>
+      <h2>Sample Test Cases</h2>
+      <div id="workspace-testcases"><p class="caption">Loading sample test cases...</p></div>
+      <h2>Constraints</h2>
+      <pre id="workspace-constraints" class="example-box"></pre>
+
+    </section>
+
+    <section class="editor-pane">
+      <div class="editor-toolbar">
+        <div class="language-wrap">
+          <label for="language">Language</label>
+          <select id="language">
+            <option value="JAVA_17">Java</option>
+            <option value="PYTHON_3">Python</option>
+          </select>
+        </div>
+        <div class="solve-time">
+          <span>Time spent</span>
+          <b id="solve-timer">00:00</b>
+        </div>
+      </div>
+      <div id="judge-disclaimer" style="display:none; background:#fff3cd; color:#856404; padding:8px 12px; font-size:0.85rem; border-bottom:1px solid #ffeeba;">
+        <strong>Notice:</strong> Python support is not available for this problem yet.
+      </div>
+      <div class="editor-frame">
+        <div class="editor-tab">
+          <span class="editor-dot red"></span>
+          <span class="editor-dot yellow"></span>
+          <span class="editor-dot green"></span>
+          <span id="editor-filename">Solution.java</span>
+          <small>Draft saved locally</small>
+        </div>
+        <textarea id="code-editor" aria-label="Code editor" spellcheck="false"></textarea>
+      </div>
+      <div class="run-panel">
+        <div>
+          <strong>Console</strong>
+          <span id="last-run">Last execution: --</span>
+        </div>
+        <div id="test-result" class="test-result">Write your code, then run sample test cases.</div>
+      </div>
+      <div class="workspace-actions">
+        <p>Solutions are evaluated in an isolated Docker sandbox.</p>
+        <div>
+          <button id="run-code" class="btn-secondary" type="button">Run demo tests</button>
+          <button id="submit-code" class="btn-primary" type="button">Submit solution</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+      </div>
+      <nav class="footer-nav">
+        <a href="problems.html">Problems</a>
+        <a href="contests.html">Contests</a>
+        <a href="discuss.html">Discuss</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="about.html">About</a>
+      </nav>
+      <p class="footer-copy">© 2026 MiniForce. Built for coders, by coders.</p>
+    </div>
+  </footer>
+
+  <script src="frontend/js/api.js"></script>
+  <script src="frontend/js/common.js"></script>
+  <script src="frontend/js/solve.js"></script>
+</body>
+</html>

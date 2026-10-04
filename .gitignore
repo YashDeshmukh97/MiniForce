@@ -1,0 +1,29 @@
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Build outputs
+backend/target/
+node_modules/
+dist/
+
+# Logs
+*.log
+logs/
+
+# IDE / OS Files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+*.suo
+.sts4-cache/
+.classpath
+.project
+.settings/
+
+# Database dumps (Ignore generated backups and test dumps, but preserve source schema)
+*.sql
+!database/miniforce.sql
+!database/migrations/*.sql

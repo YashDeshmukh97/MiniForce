@@ -1,0 +1,3 @@
+package com.miniforce.dto;
+import com.miniforce.model.Role; import jakarta.validation.constraints.*; import java.util.*; import com.miniforce.dto.SubmissionDtos.SubmissionResponse;
+public final class UserDtos { private UserDtos(){} public record UpdateProfileRequest(@Size(max=100) String fullName,@Size(max=400) String bio) {} public record UpdateAvatarRequest(@NotBlank String avatarKey) {} public record UpdateRoleRequest(@NotNull Role role) {} public record ProfileResponse(UserResponse user,long contestsJoined,List<SubmissionResponse> recentSubmissions,Map<String,Long> activity) {} public record LeaderboardEntry(long rank,UserResponse user) {} }

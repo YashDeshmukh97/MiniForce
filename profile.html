@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - MiniForce</title>
+  <link rel="stylesheet" href="miniforce.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="24" height="24"></span>mini<span>force</span></a>
+    <div class="nav-links">
+      <a href="problems.html">Problems</a>
+      <a href="contests.html">Contests</a>
+      <a href="discuss.html">Discuss</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">≡</button>
+    <div class="nav-buttons">
+      <a class="btn-outline" href="login.html">Log In</a>
+      <a class="btn-fill" href="signup.html">Sign Up</a>
+    </div>
+  </nav>
+
+  <main class="page-shell">
+    <header class="page-header">
+      <div class="eyebrow">Coder Profile</div>
+      <h1 class="page-title">Your <span class="accent">progress.</span></h1>
+    </header>
+
+    <section class="panel profile-hero">
+      <span id="profile-avatar" class="avatar a1">--</span>
+      <div style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h2 id="profile-name" class="profile-name">Loading profile...</h2>
+            <p id="profile-handle" class="profile-handle"></p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-edit-profile" class="btn-outline btn-small" style="display: none;">Edit Profile</button>
+            <button id="btn-change-avatar" class="btn-outline btn-small" style="display: none;">Change Avatar</button>
+          </div>
+        </div>
+        <p id="profile-bio" class="profile-bio"></p>
+        
+        <form id="edit-profile-form" style="display: none; margin-top: 24px; border-top: 1px solid var(--line); padding-top: 24px;">
+          <div class="form-group">
+            <label for="edit-fullname">Full Name</label>
+            <input type="text" id="edit-fullname" class="form-control" maxlength="100">
+          </div>
+          <div class="form-group">
+            <label for="edit-bio">Bio</label>
+            <textarea id="edit-bio" class="form-control" rows="3" maxlength="400"></textarea>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <button type="button" id="btn-cancel-edit" class="btn-outline">Cancel</button>
+          </div>
+        </form>
+
+        <div id="avatar-section" style="display: none; margin-top: 24px; border-top: 1px solid var(--line); padding-top: 24px;">
+          <h3 style="color: var(--white); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Choose Avatar</h3>
+          <div id="avatar-grid" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;">
+            <!-- Avatars will be populated here -->
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <button id="btn-save-avatar" class="btn-primary" disabled>Save Avatar</button>
+            <button id="btn-cancel-avatar" class="btn-outline">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stat-grid">
+      <div class="stat-box"><b id="solved-count">--</b><span>Problems Solved</span></div>
+      <div class="stat-box"><b id="streak-count">--</b><span>Day Streak</span></div>
+      <div class="stat-box"><b id="contests-count">--</b><span>Contests Joined</span></div>
+      <div class="stat-box"><b id="profile-rating">--</b><span>Global Rating</span></div>
+    </section>
+
+    <div class="profile-grid">
+      <section class="panel activity-panel">
+        <div class="activity-heading">
+          <div>
+            <h2 class="panel-title">Contribution Activity</h2>
+            <p id="activity-caption" class="caption" style="margin-top: 4px">Loading activity...</p>
+          </div>
+        </div>
+        <div class="activity-scroll">
+          <div class="activity-calendar">
+            <div class="activity-weekdays" aria-hidden="true">
+              <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
+            </div>
+            <div class="activity-grid" id="activity-grid" aria-label="Contribution activity calendar"></div>
+          </div>
+        </div>
+        <p id="activity-tooltip" class="activity-tooltip" aria-live="polite">Select a day to see its contribution count.</p>
+        <div class="activity-footer">
+          <span class="activity-legend caption">Less <i></i><i class="lv1"></i><i class="lv2"></i><i class="lv3"></i><i class="lv4"></i> More</span>
+        </div>
+      </section>
+
+      <aside class="panel progress-panel">
+        <h2 class="panel-title">Recent Submissions</h2>
+        <ul id="recent-submissions" class="recent-submissions">
+          <li class="table-state" style="border:0">Loading submissions...</li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="20" height="20"></span>mini<span>force</span></a>
+      </div>
+      <nav class="footer-nav">
+        <a href="problems.html">Problems</a>
+        <a href="contests.html">Contests</a>
+        <a href="discuss.html">Discuss</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="about.html">About</a>
+      </nav>
+      <p class="footer-copy">&copy; 2026 MiniForce.</p>
+    </div>
+  </footer>
+
+  <script src="frontend/js/api.js"></script>
+  <script src="frontend/js/common.js"></script>
+  <script src="frontend/js/profile.js"></script>
+</body>
+</html>

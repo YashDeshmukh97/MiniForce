@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - MiniForce</title>
+  <link rel="stylesheet" href="miniforce.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="24" height="24"></span>mini<span>force</span></a>
+    <div class="nav-links">
+      <a href="problems.html">Problems</a>
+      <a href="contests.html">Contests</a>
+      <a href="discuss.html">Discuss</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">≡</button>
+    <div class="nav-buttons">
+      <a class="btn-outline" href="login.html">Log In</a>
+      <a class="btn-fill" href="signup.html">Sign Up</a>
+    </div>
+  </nav>
+
+  <main class="page-shell">
+    <header class="page-header">
+      <div class="eyebrow">Admin Console</div>
+      <h1 class="page-title">Platform <span class="accent">Management</span></h1>
+    </header>
+
+    <div id="admin-error" class="auth-message" style="display:none;"></div>
+
+    <section class="panel admin-panel">
+      <h2>Platform Overview</h2>
+      <div class="admin-stat">
+        <div class="admin-stat-card">
+          <b id="stat-users">--</b>
+          <span>Total Users</span>
+        </div>
+        <div class="admin-stat-card">
+          <b id="stat-subs">--</b>
+          <span>Submissions</span>
+        </div>
+        <div class="admin-stat-card">
+          <b id="stat-problems">--</b>
+          <span>Problems</span>
+        </div>
+        <div class="admin-stat-card">
+          <b id="stat-discussions">--</b>
+          <span>Discussions</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel admin-panel" style="padding: 0; overflow: hidden;">
+      <h2 style="padding: 24px 24px 16px;">User Management</h2>
+      <div style="padding: 0 24px 24px;">
+        <input type="text" id="user-search" class="search" placeholder="Search by username or email...">
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>USER</th>
+            <th>EMAIL</th>
+            <th>ROLE</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="admin-user-list">
+          <tr><td colspan="5" class="table-state">Loading users...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel admin-panel" style="padding: 0; overflow: hidden;">
+      <h2 style="padding: 24px 24px 16px;">Moderation</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>TITLE</th>
+            <th>AUTHOR</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="admin-discussion-list">
+          <tr><td colspan="4" class="table-state">Loading discussions...</td></tr>
+        </tbody>
+      </table>
+    </section>
+      <section class="panel admin-panel" style="padding: 24px;">
+      <h2 style="margin-bottom: 16px;">Create Problem</h2>
+      <form id="problem-form" style="display: grid; gap: 12px; max-width: 600px;">
+        <input class="form-control" required name="slug" placeholder="Problem slug (e.g. valid-palindrome)">
+        <input class="form-control" required name="title" placeholder="Problem Title">
+        <select class="form-control" name="difficulty">
+          <option>EASY</option><option>MEDIUM</option><option>HARD</option>
+        </select>
+        <textarea class="form-control" required name="description" placeholder="Problem statement" rows="4"></textarea>
+        <input class="form-control" name="topics" placeholder="Topics, comma separated">
+        <div>
+          <button type="submit" class="btn-primary">Create problem</button>
+        </div>
+        <p class="auth-message" style="display: none;"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="20" height="20"></span>mini<span>force</span></a>
+      </div>
+      <nav class="footer-nav">
+        <a href="problems.html">Problems</a>
+        <a href="contests.html">Contests</a>
+        <a href="discuss.html">Discuss</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="about.html">About</a>
+      </nav>
+      <p class="footer-copy">&copy; 2026 MiniForce.</p>
+    </div>
+  </footer>
+
+  <script src="frontend/js/api.js"></script>
+  <script src="frontend/js/common.js"></script>
+  <script src="frontend/js/admin.js"></script>
+</body>
+</html>
+

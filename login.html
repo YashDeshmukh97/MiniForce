@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In — MiniForce</title>
+  <link rel="stylesheet" href="miniforce.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+    <div class="nav-links">
+      <a href="problems.html">Problems</a>
+      <a href="contests.html">Contests</a>
+      <a href="discuss.html">Discuss</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <div class="nav-buttons">
+      <a class="btn-outline" href="login.html">Log In</a>
+      <a class="btn-fill" href="signup.html">Sign Up</a>
+    </div>
+  </nav>
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+      <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+      <h1>Log In</h1>
+      <p class="auth-sub">Welcome back! Pick up your streak where you left off.</p>
+
+      <form id="login-form" class="panel" style="padding: 28px 24px;">
+        <div class="auth-message" hidden></div>
+
+        <div class="field">
+          <label for="email">Username or email</label>
+          <input type="text" id="email" name="username" placeholder="coder or coder@example.com" required autocomplete="username">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-primary">Log In</button>
+      </form>
+
+      <p class="auth-switch">Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+      </div>
+      <nav class="footer-nav">
+        <a href="problems.html">Problems</a>
+        <a href="contests.html">Contests</a>
+        <a href="discuss.html">Discuss</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="about.html">About</a>
+      </nav>
+      <p class="footer-copy">© 2026 MiniForce. Built for coders, by coders.</p>
+    </div>
+  </footer>
+
+  <script src="frontend/js/api.js"></script>
+  <script src="frontend/js/common.js"></script>
+  <script src="frontend/js/auth.js"></script>
+</body>
+</html>

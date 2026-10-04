@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discuss - MiniForce</title>
+  <link rel="stylesheet" href="miniforce.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+    <div class="nav-links">
+      <a href="problems.html">Problems</a>
+      <a href="contests.html">Contests</a>
+      <a class="active" href="discuss.html">Discuss</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <div class="nav-buttons">
+      <a class="btn-outline" href="login.html">Log In</a>
+      <a class="btn-fill" href="signup.html">Sign Up</a>
+    </div>
+  </nav>
+
+  <main class="page-shell">
+    <header class="page-header">
+      <div class="eyebrow">Community knowledge</div>
+      <h1 class="page-title">Ask. Share. <span class="accent">Solve together.</span></h1>
+      <p class="page-intro">Exchange approaches, post clean solutions and help fellow coders get unstuck without giving away the whole fun.</p>
+    </header>
+
+    <div class="discuss-layout">
+      <section>
+        <div class="discuss-actions">
+          <div class="sort-tabs">
+            <button class="sort-tab active" type="button">Recent</button>
+          </div>
+          <button id="new-discussion" class="btn-primary btn-small" type="button">+ New post</button>
+        </div>
+
+        <form id="discussion-form" class="panel inline-form" hidden>
+          <input id="discussion-title" required maxlength="220" placeholder="Discussion title">
+          <textarea id="discussion-body" required maxlength="10000" placeholder="Share a question, solution idea, or useful hint"></textarea>
+          <button class="btn-primary btn-small" type="submit">Publish discussion</button>
+          <p class="auth-message" hidden></p>
+        </form>
+
+        <div id="discussion-list" class="panel thread-list">
+          <p class="table-state">Loading discussions…</p>
+        </div>
+
+        <section id="discussion-detail" class="panel discussion-detail" hidden></section>
+      </section>
+
+      <aside>
+        <section class="panel side-panel">
+          <h3>Explore topics</h3>
+          <a class="side-link" href="#">Arrays</a>
+          <a class="side-link" href="#">Dynamic Programming</a>
+          <a class="side-link" href="#">Interview Prep</a>
+          <a class="side-link" href="#">Java</a>
+          <a class="side-link" href="#">Contests</a>
+        </section>
+
+        <section class="panel side-panel" style="margin-top:20px">
+          <h3>Community guidelines</h3>
+          <p>Give hints first. Mark spoilers clearly. Make the next coder stronger.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+      </div>
+      <nav class="footer-nav">
+        <a href="problems.html">Problems</a>
+        <a href="contests.html">Contests</a>
+        <a href="discuss.html">Discuss</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="about.html">About</a>
+      </nav>
+      <p class="footer-copy">© 2026 MiniForce. Built for coders, by coders.</p>
+    </div>
+  </footer>
+
+  <script src="frontend/js/api.js"></script>
+  <script src="frontend/js/common.js"></script>
+  <script src="frontend/js/discussions.js"></script>
+</body>
+</html>

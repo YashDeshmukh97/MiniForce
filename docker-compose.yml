@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend/react
+    image: miniforce-frontend:latest
+    ports:
+      - "80:80"
+    networks:
+      - miniforce_net
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+    image: miniforce-backend:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - MINIFORCE_DB_URL=jdbc:mysql://mysql:3306/miniforce?useSSL=false&allowPublicKeyRetrieval=true
+      - MINIFORCE_DB_USER=${MINIFORCE_DB_USER:-miniforce}
+      - MINIFORCE_DB_PASSWORD=${MINIFORCE_DB_PASSWORD}
+      - MINIFORCE_JWT_SECRET=${MINIFORCE_JWT_SECRET}
+      - MINIFORCE_FRONTEND_ORIGIN=${MINIFORCE_FRONTEND_ORIGIN:-http://localhost}
+      - MINIFORCE_JUDGE_REAL_ENABLED=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Required for Docker-in-Docker real judge execution
+      - /tmp:/tmp # Required for shared workspace
+    networks:
+      - miniforce_net
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=miniforce
+      - MYSQL_USER=${MINIFORCE_DB_USER:-miniforce}
+      - MYSQL_PASSWORD=${MINIFORCE_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MINIFORCE_DB_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - miniforce_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  miniforce_net:
+    driver: bridge
+
+volumes:
+  mysql_data:

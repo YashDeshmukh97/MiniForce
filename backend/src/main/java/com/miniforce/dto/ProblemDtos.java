@@ -1,0 +1,8 @@
+package com.miniforce.dto;
+import com.miniforce.model.*; import jakarta.validation.constraints.*; import java.util.*;
+public final class ProblemDtos { private ProblemDtos(){}
+ public record ProblemRequest(@NotBlank @Pattern(regexp="^[a-z0-9-]{3,100}$") String slug,@NotBlank @Size(max=180) String title,@NotNull Difficulty difficulty,@NotBlank String description,String starterCode,String constraintsText,@DecimalMin("0.0") @DecimalMax("100.0") double acceptanceRate,Set<@NotBlank @Size(max=70) String> topics) {}
+ public record ProblemSummary(Long id,String slug,String title,Difficulty difficulty,double acceptanceRate,List<String> topics,Boolean solved) { public static ProblemSummary from(Problem p, Boolean solved){return new ProblemSummary(p.getId(),p.getSlug(),p.getTitle(),p.getDifficulty(),p.getAcceptanceRate(),p.getTopics().stream().map(Topic::getName).sorted().toList(),solved);} }
+ public record ProblemDetail(Long id,String slug,String title,Difficulty difficulty,String description,String starterCode,String starterCodePython,String constraintsText,double acceptanceRate,List<String> topics) { public static ProblemDetail from(Problem p){return new ProblemDetail(p.getId(),p.getSlug(),p.getTitle(),p.getDifficulty(),p.getDescription(),p.getStarterCode(),p.getStarterCodePython(),p.getConstraintsText(),p.getAcceptanceRate(),p.getTopics().stream().map(Topic::getName).sorted().toList());} }
+ public record TestCaseRequest(@NotBlank String inputData,@NotBlank String expectedOutput,boolean sampleCase) {} public record TestCaseResponse(Long id,String inputData,String expectedOutput,boolean sampleCase) { public static TestCaseResponse from(TestCase t){return new TestCaseResponse(t.getId(),t.getInputData(),t.getExpectedOutput(),t.isSampleCase());} }
+}

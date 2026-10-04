@@ -1,0 +1,3 @@
+package com.miniforce.repository;
+import com.miniforce.model.ContestParticipant; import org.springframework.data.jpa.repository.JpaRepository; import org.springframework.data.jpa.repository.Query; import org.springframework.data.repository.query.Param; import java.util.*;
+public interface ContestParticipantRepository extends JpaRepository<ContestParticipant,Long> { boolean existsByContestIdAndUserId(Long contestId,Long userId); long countByUserId(Long userId); Optional<ContestParticipant> findByContestIdAndUserId(Long contestId,Long userId); @Query("select p from ContestParticipant p join fetch p.user where p.contest.id=:contestId order by p.score desc, p.joinedAt asc") List<ContestParticipant> leaderboard(@Param("contestId") Long contestId); }

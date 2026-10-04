@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — MiniForce</title>
+  <link rel="stylesheet" href="miniforce.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+    <div class="nav-links">
+      <a href="problems.html">Problems</a>
+      <a href="contests.html">Contests</a>
+      <a href="discuss.html">Discuss</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <div class="nav-buttons">
+      <a class="btn-outline" href="login.html">Log In</a>
+      <a class="btn-fill" href="signup.html">Sign Up</a>
+    </div>
+  </nav>
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+      <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+      <h1>Create your account</h1>
+      <p class="auth-sub">Practice, compete, and build your streak from day one.</p>
+
+      <form id="signup-form">
+        <div class="auth-message" hidden></div>
+
+        <div class="field">
+          <label for="fullname">Full name</label>
+          <input type="text" id="fullname" placeholder="Your name" autocomplete="name">
+        </div>
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="coder123" autocomplete="username">
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
+        </div>
+
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input type="password" id="confirm" placeholder="••••••••" autocomplete="new-password">
+        </div>
+
+        <div class="field">
+          <label class="check-item" for="terms">
+            <input type="checkbox" id="terms">
+            <span>I agree to the Terms of Service and Privacy Policy</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary">Create Free Account</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="login.html">Log in</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark"><img src="frontend/img/logo.svg" alt="" width="28" height="28"></span>mini<span>force</span></a>
+      </div>
+      <nav class="footer-nav">
+        <a href="problems.html">Problems</a>
+        <a href="contests.html">Contests</a>
+        <a href="discuss.html">Discuss</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="about.html">About</a>
+      </nav>
+      <p class="footer-copy">© 2026 MiniForce. Built for coders, by coders.</p>
+    </div>
+  </footer>
+
+  <script src="frontend/js/api.js"></script>
+  <script src="frontend/js/common.js"></script>
+  <script src="frontend/js/auth.js"></script>
+</body>
+</html>
