@@ -11,6 +11,9 @@ public class ArrayExactComparator implements OutputComparator {
         try {
             JsonNode expectedNode = mapper.readTree(expected);
             JsonNode actualNode = mapper.readTree(actual);
+            if (expectedNode == null || actualNode == null || !expectedNode.isArray() || !actualNode.isArray()) {
+                return false;
+            }
             return expectedNode.equals(actualNode);
         } catch (Exception e) {
             return false;

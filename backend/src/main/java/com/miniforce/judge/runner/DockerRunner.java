@@ -37,6 +37,8 @@ public class DockerRunner {
         cmd.add(String.valueOf(spec.policy().pidsLimit()));
         cmd.add("--user");
         cmd.add("1000:1000");
+        cmd.add("--cap-drop=ALL");
+        cmd.add("--security-opt=no-new-privileges");
 
         if (spec.env() != null) {
             spec.env().forEach((k, v) -> {
@@ -80,7 +82,9 @@ public class DockerRunner {
             CompletableFuture<StreamOutput> stdoutFuture = CompletableFuture.supplyAsync(() -> readStream(activeProcess.getInputStream(), maxBytes));
             CompletableFuture<StreamOutput> stderrFuture = CompletableFuture.supplyAsync(() -> readStream(activeProcess.getErrorStream(), maxBytes));
 
-            boolean finished = process.waitFor(spec.timeoutSeconds(), TimeUnit.SECONDS);
+            // Isolate host-side Docker CLI + volume mount startup overhead from container execution timeout
+            long hostWaitMs = spec.timeoutSeconds() * 1000L + 4000L;
+            boolean finished = process.waitFor(hostWaitMs, TimeUnit.MILLISECONDS);
             long duration = System.currentTimeMillis() - startTime;
 
             if (!finished) {
@@ -94,19 +98,45 @@ public class DockerRunner {
             StreamOutput stdout = stdoutFuture.get(1, TimeUnit.SECONDS);
             StreamOutput stderr = stderrFuture.get(1, TimeUnit.SECONDS);
 
-            log.info("Container {} finished with exit code {} in {} ms", spec.containerName(), process.exitValue(), duration);
+            int exitCode = process.exitValue();
+            log.info("Container {} finished with exit code {} in {} ms", spec.containerName(), exitCode, duration);
             boolean outputTruncated = stdout.truncated() || stderr.truncated();
-            return new RunnerResult(process.exitValue(), stdout.content(), stderr.content(), false, null, duration, outputTruncated);
+
+            if (isDockerInfrastructureError(exitCode, stderr.content())) {
+                String errMsg = "Docker infrastructure error (exit " + exitCode + "): " + stderr.content().trim();
+                log.error("Docker infrastructure failure for {}: {}", spec.containerName(), errMsg);
+                return new RunnerResult(exitCode, stdout.content(), stderr.content(), false, errMsg, duration, outputTruncated);
+            }
+
+            return new RunnerResult(exitCode, stdout.content(), stderr.content(), false, null, duration, outputTruncated);
 
         } catch (Exception e) {
             log.error("System error executing docker container {}", spec.containerName(), e);
             cleanupContainer(spec.containerName());
-            return new RunnerResult(-1, "", "", false, e.getMessage(), 0, false);
+            String msg = e.getMessage() != null ? e.getMessage() : e.toString();
+            return new RunnerResult(-1, "", "", false, msg, 0, false);
         } finally {
             if (process != null) {
                 process.destroyForcibly();
             }
         }
+    }
+
+    public static boolean isDockerInfrastructureError(int exitCode, String stderr) {
+        if (exitCode == 0) {
+            return false;
+        }
+        String err = stderr == null ? "" : stderr.trim().toLowerCase();
+        if (err.contains("cannot connect to the docker daemon")
+                || err.contains("failed to connect to the docker api")
+                || err.contains("error during connect:")
+                || err.contains("error response from daemon")
+                || err.contains("unable to find image")
+                || err.contains("is the docker daemon running")
+                || err.startsWith("docker:")) {
+            return true;
+        }
+        return exitCode == 125 || exitCode == 126 || exitCode == 127;
     }
 
     private void cleanupContainer(String containerName) {

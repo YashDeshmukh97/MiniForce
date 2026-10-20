@@ -165,8 +165,7 @@ public class JudgeWorkerTest {
         worker.processNext();
 
         Submission db = submissions.findById(s.getId()).orElseThrow();
-        assertThat(db.getStatus()).isEqualTo(SubmissionStatus.COMPILATION_ERROR);
-        assertThat(db.getCompilerOutput()).isEqualTo("Mock compilation error");
+        assertThat(db.getStatus()).isEqualTo(SubmissionStatus.SYSTEM_ERROR);
         assertThat(db.getLeaseExpiresAt()).isNull(); // cleared
     }
 

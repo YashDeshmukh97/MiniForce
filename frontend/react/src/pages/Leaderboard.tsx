@@ -4,6 +4,7 @@ import type { LeaderboardEntry } from '@/types'
 import { motion } from 'framer-motion'
 import { Loading } from '@/components/ui/Loading'
 import { ErrorState } from '@/components/ui/ErrorState'
+import { getAvatarImage } from '@/config/avatars'
 
 export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
@@ -40,11 +41,11 @@ export default function LeaderboardPage() {
   return (
     <main className="max-w-6xl mx-auto py-12 px-4 lg:px-8">
       <header className="mb-12 text-center">
-        <div className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2">
+        <div className="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-2">
           Global Rankings
         </div>
         <h1 className="text-4xl font-extrabold text-slate-100 tracking-tight">
-          Hall of <span className="text-blue-500">Fame</span>
+          Hall of <span className="text-indigo-400">Fame</span>
         </h1>
       </header>
 
@@ -101,9 +102,7 @@ export default function LeaderboardPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <img
-                            src={`/frontend/assets/avatars/${
-                              e.user.avatarKey || 'avatar_default'
-                            }.svg`}
+                            src={getAvatarImage(e.user.avatarKey)}
                             alt=""
                             className="w-10 h-10 rounded-full border border-slate-700 bg-slate-800"
                           />
@@ -117,7 +116,7 @@ export default function LeaderboardPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-semibold text-blue-400">
+                      <td className="px-6 py-4 font-semibold text-indigo-400">
                         {e.user.rating.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 hidden md:table-cell">
@@ -172,9 +171,7 @@ function PodiumPerson({
     >
       {place === 'first' && <div className="text-3xl mb-2">👑</div>}
       <img
-        src={`/frontend/assets/avatars/${
-          entry.user.avatarKey || 'avatar_default'
-        }.svg`}
+        src={getAvatarImage(entry.user.avatarKey)}
         alt=""
         className={`w-14 h-14 md:w-16 md:h-16 rounded-full border-2 mb-3 bg-slate-800 ${
           place === 'first'

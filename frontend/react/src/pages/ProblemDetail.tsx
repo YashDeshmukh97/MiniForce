@@ -56,7 +56,9 @@ export default function ProblemDetailPage() {
               </Badge>
               <div className="h-4 w-[1px] bg-slate-800" />
               <span className="text-sm text-slate-400 font-medium">
-                Acceptance: {Number(problem.acceptanceRate || 0).toFixed(1)}%
+                Acceptance: {problem.acceptanceRate && problem.acceptanceRate > 0
+                  ? `${Number(problem.acceptanceRate).toFixed(1)}%`
+                  : '—'}
               </span>
               <div className="h-4 w-[1px] bg-slate-800" />
               <div className="flex gap-1.5">

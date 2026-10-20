@@ -5,13 +5,7 @@ import { api } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Calendar, Edit2, Check, X, Medal, Flame, Activity } from 'lucide-react'
 import { useMemo, useState } from 'react'
-
-const AVATARS = [
-  "robot_01", "cat_01", "fox_01", "panda_01", "lion_01", 
-  "frog_01", "koala_01", "tiger_01", "monkey_01", "unicorn_01", 
-  "developer_01", "gaming_01", "rocket_01", "lightning_01", 
-  "terminal_01", "controller_01", "avatar_default"
-]
+import { AVATAR_OPTIONS, getAvatarImage } from '@/config/avatars'
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth()
@@ -48,6 +42,7 @@ export default function ProfilePage() {
     try {
       await api.users.updateAvatar(selectedAvatar)
       await refreshUser()
+      await refetch()
       setIsAvatarOpen(false)
     } catch (err) {
       alert('Failed to update avatar')
@@ -90,13 +85,13 @@ export default function ProfilePage() {
             <div className="relative">
               <div className="h-32 w-32 rounded-full border-4 border-slate-950 bg-slate-800 overflow-hidden">
                 <img 
-                  src={`/frontend/assets/avatars/${user.avatarKey || 'avatar_default'}.svg`} 
+                  src={getAvatarImage(data.user.avatarKey || user.avatarKey)} 
                   alt="Avatar" 
                   className="h-full w-full object-cover"
                 />
               </div>
               <button 
-                onClick={() => { setSelectedAvatar(user.avatarKey || 'avatar_default'); setIsAvatarOpen(true); }}
+                onClick={() => { setSelectedAvatar(data.user.avatarKey || user.avatarKey || 'avatar_default'); setIsAvatarOpen(true); }}
                 className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white border-2 border-slate-950 hover:bg-indigo-500 transition-colors"
                 title="Change Avatar"
               >
@@ -105,13 +100,13 @@ export default function ProfilePage() {
             </div>
             
             <div className="flex-1 pb-2">
-              <h1 className="text-3xl font-bold text-white tracking-tight">{user.fullName}</h1>
-              <p className="text-indigo-400 font-medium">@{user.username}</p>
+              <h1 className="text-3xl font-bold text-white tracking-tight">{data.user.fullName}</h1>
+              <p className="text-indigo-400 font-medium">@{data.user.username}</p>
             </div>
             
             <div className="flex items-center gap-4 pb-3">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{user.rating.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-white">{data.user.rating.toLocaleString()}</div>
                 <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Rating</div>
               </div>
             </div>
@@ -147,7 +142,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <p className="text-slate-300 leading-relaxed text-sm">
-                  {user.bio || 'Add a bio from your account settings.'}
+                  {data.user.bio || 'Add a bio from your account settings.'}
                 </p>
               )}
             </div>
@@ -158,14 +153,14 @@ export default function ProfilePage() {
                   <Check className="h-4 w-4" />
                   <span className="text-sm">Solved</span>
                 </div>
-                <div className="text-xl font-semibold text-slate-200">{user.solvedCount}</div>
+                <div className="text-xl font-semibold text-slate-200">{data.user.solvedCount}</div>
               </div>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-slate-400">
                   <Flame className="h-4 w-4" />
                   <span className="text-sm">Streak</span>
                 </div>
-                <div className="text-xl font-semibold text-slate-200">{user.streak} days</div>
+                <div className="text-xl font-semibold text-slate-200">{data.user.streak} days</div>
               </div>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-slate-400">
@@ -185,30 +180,70 @@ export default function ProfilePage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg rounded-2xl bg-slate-900 p-6 border border-slate-800 shadow-2xl"
+            className="w-full max-w-4xl rounded-2xl bg-slate-950 p-8 border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col"
+            style={{ maxHeight: '90vh' }}
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-white">Choose Avatar</h3>
-              <button onClick={() => setIsAvatarOpen(false)} className="text-slate-400 hover:text-white">
-                <X className="h-5 w-5" />
+            <div className="flex justify-between items-center mb-6 shrink-0">
+              <div>
+                <h3 className="text-3xl font-bold text-white mb-2">MiniForce <span className="text-indigo-400">Avatars</span></h3>
+                <p className="text-slate-400">Choose your avatar and stand out in the community!</p>
+              </div>
+              <button onClick={() => setIsAvatarOpen(false)} className="text-slate-400 hover:text-white self-start">
+                <X className="h-6 w-6" />
               </button>
             </div>
             
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 max-h-[60vh] overflow-y-auto p-1">
-              {AVATARS.map(a => (
-                <button
-                  key={a}
-                  onClick={() => setSelectedAvatar(a)}
-                  className={`aspect-square rounded-full border-2 transition-all p-1 ${
-                    selectedAvatar === a ? 'border-indigo-500 scale-110 bg-indigo-500/10' : 'border-transparent hover:border-slate-700'
-                  }`}
-                >
-                  <img src={`/frontend/assets/avatars/${a}.svg`} className="w-full h-full" alt={a} />
-                </button>
-              ))}
+            <div className="overflow-y-auto pr-2 custom-scrollbar" style={{ flexGrow: 1 }}>
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <span className="text-indigo-400">🐾</span> Animal Avatars ({AVATAR_OPTIONS.filter(a => a.category === 'animal').length})
+                </h4>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 gap-4">
+                  {AVATAR_OPTIONS.filter(a => a.category === 'animal').map(a => (
+                    <button
+                      key={a.id}
+                      onClick={() => setSelectedAvatar(a.id)}
+                      className={`relative flex flex-col items-center gap-2 rounded-xl border-2 transition-all p-2 ${
+                        selectedAvatar === a.id 
+                          ? 'border-indigo-500 bg-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.5)]' 
+                          : 'border-slate-800 hover:border-slate-600 hover:bg-slate-800/50'
+                      }`}
+                    >
+                      <div className="w-full aspect-square overflow-hidden rounded-lg">
+                        <img src={a.image} className="w-full h-full object-cover" alt={a.name} />
+                      </div>
+                      <span className={`text-xs font-semibold ${selectedAvatar === a.id ? 'text-indigo-300' : 'text-slate-300'}`}>{a.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <span className="text-indigo-400">🎮</span> Other Avatars ({AVATAR_OPTIONS.filter(a => a.category === 'other').length})
+                </h4>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-4">
+                  {AVATAR_OPTIONS.filter(a => a.category === 'other').map(a => (
+                    <button
+                      key={a.id}
+                      onClick={() => setSelectedAvatar(a.id)}
+                      className={`relative flex flex-col items-center gap-2 rounded-xl border-2 transition-all p-2 ${
+                        selectedAvatar === a.id 
+                          ? 'border-indigo-500 bg-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.5)]' 
+                          : 'border-slate-800 hover:border-slate-600 hover:bg-slate-800/50'
+                      }`}
+                    >
+                      <div className="w-full aspect-square overflow-hidden rounded-lg">
+                        <img src={a.image} className="w-full h-full object-cover" alt={a.name} />
+                      </div>
+                      <span className={`text-xs font-semibold ${selectedAvatar === a.id ? 'text-indigo-300' : 'text-slate-300'}`}>{a.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-8">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-800 shrink-0">
               <Button variant="ghost" onClick={() => setIsAvatarOpen(false)}>Cancel</Button>
               <Button onClick={handleAvatarUpdate} isLoading={isUpdating}>Save Avatar</Button>
             </div>

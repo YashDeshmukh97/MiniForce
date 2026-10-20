@@ -52,7 +52,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 reject(request, response);
                 return false;
             }
-        } else if (path.startsWith("/api/submissions/run") || path.startsWith("/api/submissions/async")) {
+        } else if (path.startsWith("/api/submissions/run")
+                || path.startsWith("/api/submissions/async")
+                || (path.equals("/api/submissions") && "POST".equalsIgnoreCase(request.getMethod()))) {
             String key = request.getRemoteAddr();
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof User u) {

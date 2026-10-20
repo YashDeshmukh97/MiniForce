@@ -11,6 +11,7 @@ import type {
   LeaderboardEntry,
   LoginRequest,
   ProblemDetail,
+  ProblemHint,
   ProblemSummary,
   RegisterRequest,
   Reply,
@@ -41,9 +42,16 @@ export class ApiError extends Error {
   }
 }
 
-// ─── Base fetch ───────────────────────────────────────────────────────────────
+function resolveBaseUrl(): string {
+  const raw = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE || '/api') as string
+  const trimmed = raw.trim().replace(/\/+$/, '')
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
+  }
+  return trimmed || '/api'
+}
 
-const BASE = import.meta.env.VITE_API_BASE ?? '/api'
+const BASE = resolveBaseUrl()
 
 interface RequestOptions {
   method?: string
@@ -140,6 +148,8 @@ export const problems = {
   remove: (id: number) => request<null>(`/problems/${id}`, { method: 'DELETE' }),
 
   tests: (id: number) => request<TestCase[]>(`/problems/${id}/test-cases`),
+
+  hints: (id: number) => request<ProblemHint[]>(`/problems/${id}/hints`),
 
   addTest: (id: number, body: Pick<TestCase, 'inputData' | 'expectedOutput'>) =>
     request<TestCase>(`/problems/${id}/test-cases`, { method: 'POST', body }),

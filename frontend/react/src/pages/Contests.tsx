@@ -60,11 +60,11 @@ export default function ContestsPage() {
   return (
     <main className="max-w-5xl mx-auto py-12 px-4 lg:px-8">
       <header className="mb-12">
-        <div className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2">
+        <div className="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-2">
           Compete
         </div>
         <h1 className="text-4xl font-extrabold text-slate-100 tracking-tight">
-          Coding <span className="text-blue-500">Contests</span>
+          Coding <span className="text-indigo-400">Contests</span>
         </h1>
         <p className="mt-4 text-slate-400 max-w-2xl text-lg">
           Test your skills against the community. Join live contests or practice
@@ -111,7 +111,7 @@ export default function ContestsPage() {
                     <div>
                       <Link
                         to={`/contests/${c.id}`}
-                        className="text-slate-200 font-semibold hover:text-blue-400 transition-colors"
+                        className="text-slate-200 font-semibold hover:text-indigo-400 transition-colors"
                       >
                         {c.title}
                       </Link>
@@ -147,7 +147,7 @@ function ContestCard({
       whileHover={{ scale: 1.01 }}
       className={`group relative overflow-hidden rounded-xl border p-6 flex flex-col sm:flex-row sm:items-center gap-6 ${
         isLive
-          ? 'bg-blue-900/10 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.05)]'
+          ? 'bg-indigo-950/20 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]'
           : 'bg-slate-900/50 border-slate-800'
       }`}
     >
@@ -162,7 +162,7 @@ function ContestCard({
         <h3 className="text-lg font-bold text-slate-100 truncate mb-1">
           <Link
             to={`/contests/${contest.id}`}
-            className="hover:text-blue-400 focus:outline-none focus:underline"
+            className="hover:text-indigo-400 focus:outline-none focus:underline"
           >
             {contest.title}
           </Link>

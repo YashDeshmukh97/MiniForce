@@ -27,6 +27,10 @@ if not exist "%FRONTEND_DIR%\package.json" (
     echo [ERROR] The React frontend folder is missing or incomplete.
     goto :fatal
 )
+if not exist "%FRONTEND_DIR%\vite.config.ts" (
+    echo [ERROR] The Vite frontend configuration is missing.
+    goto :fatal
+)
 if not exist "%PROJECT_DIR%\Dockerfile" (
     echo [ERROR] The Docker judge Dockerfile is missing.
     goto :fatal
@@ -80,15 +84,20 @@ set "MINIFORCE_JUDGE_REAL_ENABLED=true"
 set "MINIFORCE_CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173"
 echo Private configuration is available.
 
-echo [3/7] Checking MySQL and local ports...
+echo [3/7] Checking MySQL and service ports...
 call :testTcpPort 3306
 if errorlevel 1 (
     echo [ERROR] MySQL is not reachable on 127.0.0.1:3306. Start your existing MiniForce MySQL service first.
     goto :fatal
 )
-call :requireFreePort 8080 || goto :fatal
-call :requireFreePort 5173 || goto :fatal
-echo MySQL is reachable and the MiniForce ports are free.
+
+rem Check port 8080 (backend) state
+call :checkServicePort 8080 "MiniForce Backend" "%BACKEND_URL%" 401 START_BACKEND || goto :fatal
+
+rem Check port 5173 (frontend) state
+call :checkServicePort 5173 "MiniForce Frontend" "%FRONTEND_URL%" 200 START_FRONTEND || goto :fatal
+
+echo MySQL is reachable and ports are validated.
 
 echo [4/7] Preparing the React frontend...
 if exist "%FRONTEND_DIR%\node_modules\" (
@@ -118,30 +127,47 @@ if errorlevel 1 (
     echo The real judge image is ready.
 )
 
-echo [6/7] Starting the Spring Boot backend...
-start "MiniForce Backend" /D "%BACKEND_DIR%" cmd /d /k "title MiniForce Backend && mvn spring-boot:run"
-call :waitForHttpStatus "%BACKEND_URL%" 401 45
-if errorlevel 1 (
-    echo.
-    echo [ERROR] The backend did not become ready on port 8080.
-    echo Check the "MiniForce Backend" window for the exact message.
-    echo Run STOP-MINIFORCE.bat after reviewing the message.
-    exit /b 1
-)
-echo Backend is ready.
-
-echo [7/7] Starting the React frontend...
-start "MiniForce Frontend" /D "%FRONTEND_DIR%" cmd /d /k "title MiniForce Frontend && npm run dev"
-call :waitForHttpStatus "%FRONTEND_URL%" 200 30
-if errorlevel 1 (
-    echo.
-    echo [ERROR] The React frontend did not become ready on port 5173.
-    echo Check the "MiniForce Frontend" window for the exact message, then run STOP-MINIFORCE.bat.
-    exit /b 1
+if "%START_BACKEND%"=="1" (
+    echo [6/7] Starting the Spring Boot backend...
+    start "MiniForce Backend" /D "%BACKEND_DIR%" cmd /d /k "title MiniForce Backend && mvn spring-boot:run"
+    call :waitForHttpStatus "%BACKEND_URL%" 401 60
+    if errorlevel 1 (
+        echo.
+        echo [ERROR] The backend did not become ready on port 8080.
+        echo Check the "MiniForce Backend" window for the exact message.
+        echo Run STOP-MINIFORCE.bat after reviewing the message.
+        exit /b 1
+    )
+    echo Backend is ready.
+) else (
+    echo [6/7] Spring Boot backend is already running on port 8080.
 )
 
-rem Verify that the Vite frontend can proxy an API request
-call :waitForHttpStatus "%FRONTEND_URL%/api/auth/me" 401 5
+if "%START_FRONTEND%"=="1" (
+    echo [7/7] Starting the React frontend...
+    start "MiniForce Frontend" /D "%FRONTEND_DIR%" cmd /d /k "title MiniForce Frontend && npm run dev"
+    call :waitForHttpStatus "%FRONTEND_URL%" 200 30
+    if errorlevel 1 (
+        echo.
+        echo [ERROR] The React frontend did not become ready on port 5173.
+        echo Check the "MiniForce Frontend" window for the exact message, then run STOP-MINIFORCE.bat.
+        exit /b 1
+    )
+) else (
+    echo [7/7] React frontend is already running on port 5173.
+)
+
+rem Verify that port 5173 is serving the authentic React application (not a legacy static HTML page)
+call :verifyReactApp "%FRONTEND_URL%"
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Port 5173 is active, but is not serving the MiniForce React application.
+    echo Please make sure no legacy static server is holding port 5173, then run STOP-MINIFORCE.bat.
+    exit /b 1
+)
+
+rem Verify that the Vite frontend proxy can reach the backend
+call :waitForHttpStatus "%FRONTEND_URL%/api/auth/me" 401 10
 if errorlevel 1 (
     echo.
     echo [ERROR] The React frontend started, but it cannot reach the MiniForce API through its local proxy.
@@ -149,7 +175,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Frontend and API connection are ready.
+echo Frontend, API connection, and Jolly Roger branding are ready.
 echo.
 echo Opening MiniForce in your browser: %FRONTEND_URL%/
 start "" "%FRONTEND_URL%/"
@@ -180,16 +206,48 @@ exit /b 1
 powershell -NoProfile -Command "$client = New-Object System.Net.Sockets.TcpClient; try { $client.Connect('127.0.0.1', %~1); exit 0 } catch { exit 1 } finally { $client.Dispose() }" >nul 2>&1
 exit /b %ERRORLEVEL%
 
-:requireFreePort
-powershell -NoProfile -Command "$listener = Get-NetTCPConnection -State Listen -LocalPort %~1 -ErrorAction SilentlyContinue; if ($listener) { exit 1 } exit 0" >nul 2>&1
-if not errorlevel 1 exit /b 0
-echo [ERROR] Port %~1 is already in use. Use STOP-MINIFORCE.bat or close the program using the port.
+:checkServicePort
+rem Checks whether port %~1 is free (sets outVar=1), already running our service (sets outVar=0), or occupied by foreign process (fails)
+set "PORT_STATE=FREE"
+for /f "usebackq tokens=*" %%P in (`powershell -NoProfile -Command "try { $conns = @(Get-NetTCPConnection -State Listen -LocalPort %~1 -ErrorAction SilentlyContinue); if ($conns.Count -gt 0) { $ownerProcessId = $conns[0].OwningProcess; $proc = Get-Process -Id $ownerProcessId -ErrorAction SilentlyContinue; $procName = if ($proc) { $proc.ProcessName } else { 'Unknown' }; Write-Output ($ownerProcessId.ToString() + ':' + $procName) } else { Write-Output 'FREE' } } catch { Write-Output 'FREE' }"` ) do set "PORT_STATE=%%P"
+
+if not defined PORT_STATE set "PORT_STATE=FREE"
+
+if "%PORT_STATE%"=="FREE" (
+    set "%~5=1"
+    exit /b 0
+)
+
+rem Port is in use. Test if it's already an active healthy MiniForce service
+call :testHttpStatus "%~3" %~4
+if not errorlevel 1 (
+    echo %~2 is already running and ready on port %~1.
+    set "%~5=0"
+    exit /b 0
+)
+
+set "CONFLICT_PID=Unknown"
+set "CONFLICT_NAME=Unknown Process"
+for /f "tokens=1* delims=:" %%A in ("%PORT_STATE%") do (
+    if not "%%A"=="" set "CONFLICT_PID=%%A"
+    if not "%%B"=="" set "CONFLICT_NAME=%%B"
+)
+echo [ERROR] Port %~1 is in use by %CONFLICT_NAME% (PID %CONFLICT_PID%).
+echo If this is an orphaned process from a previous run, use STOP-MINIFORCE.bat to clear it.
 exit /b 1
+
+:testHttpStatus
+powershell -NoProfile -Command "$status = 0; try { $response = Invoke-WebRequest -Uri '%~1' -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop; $status = [int]$response.StatusCode } catch { if ($_.Exception.Response) { $status = [int]$_.Exception.Response.StatusCode } }; if ($status -eq %~2) { exit 0 } exit 1" >nul 2>&1
+exit /b %ERRORLEVEL%
+
+:verifyReactApp
+powershell -NoProfile -Command "try { $res = Invoke-WebRequest -Uri '%~1' -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop; if ($res.Content -match 'id=\x22root\x22' -or $res.Content -match 'main\.tsx') { exit 0 } exit 1 } catch { exit 1 }" >nul 2>&1
+exit /b %ERRORLEVEL%
 
 :waitForHttpStatus
 for /L %%A in (1,1,%~3) do (
     powershell -NoProfile -Command "$status = 0; try { $response = Invoke-WebRequest -Uri '%~1' -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop; $status = [int]$response.StatusCode } catch { if ($_.Exception.Response) { $status = [int]$_.Exception.Response.StatusCode } }; if ($status -eq %~2) { exit 0 } exit 1" >nul 2>&1
     if not errorlevel 1 exit /b 0
-    timeout /t 2 /nobreak >nul
+    powershell -NoProfile -Command "Start-Sleep -Seconds 2" >nul 2>&1
 )
 exit /b 1

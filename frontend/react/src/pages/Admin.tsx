@@ -131,11 +131,11 @@ export default function AdminPage() {
   return (
     <main className="max-w-7xl mx-auto py-12 px-4 lg:px-8 space-y-12">
       <header>
-        <div className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2">
+        <div className="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-2">
           Admin Console
         </div>
         <h1 className="text-4xl font-extrabold text-slate-100 tracking-tight">
-          Platform <span className="text-blue-500">Management</span>
+          Platform <span className="text-indigo-400">Management</span>
         </h1>
       </header>
 
@@ -195,7 +195,7 @@ export default function AdminPage() {
                         </td>
                         <td className="px-6 py-3">
                           <select
-                            className="bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                             value={u.role}
                             onChange={(e) =>
                               handleRoleChange(u.id, e.target.value as 'USER' | 'ADMIN')
@@ -291,7 +291,7 @@ export default function AdminPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <select
-                    className="flex h-10 w-full rounded-md border border-slate-800 bg-slate-900/50 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="flex h-10 w-full rounded-md border border-slate-800 bg-slate-900/50 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                     value={probDifficulty}
                     onChange={(e) => setProbDifficulty(e.target.value as Difficulty)}
                   >
@@ -309,7 +309,7 @@ export default function AdminPage() {
                   required
                   rows={3}
                   placeholder="Problem statement"
-                  className="w-full bg-slate-900/50 border border-slate-800 rounded-lg px-4 py-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-y"
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-lg px-4 py-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-y"
                   value={probDescription}
                   onChange={(e) => setProbDescription(e.target.value)}
                 />

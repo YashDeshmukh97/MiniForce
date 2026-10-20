@@ -1,5 +1,7 @@
+import { MiniForceLogo } from '@/components/brand'
 import { useAuth } from '@/context/AuthContext'
-import { LogOut, Menu, Shield, User, X, Zap } from 'lucide-react'
+import { getAvatarImage } from '@/config/avatars'
+import { LogOut, Menu, Shield, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 
@@ -28,8 +30,8 @@ export default function AppShell() {
       <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl text-white">
-            <Zap className="h-5 w-5 text-indigo-400" />
+          <Link to="/" className="flex items-center gap-2.5 font-bold text-xl text-white group">
+            <MiniForceLogo className="h-6 w-6" />
             MiniForce
           </Link>
 
@@ -66,10 +68,14 @@ export default function AppShell() {
                 )}
                 <Link
                   to="/profile"
-                  className="flex items-center gap-1.5 text-sm text-slate-300 hover:text-white"
+                  className="flex items-center gap-2 text-sm text-slate-300 hover:text-white group"
                 >
-                  <User className="h-4 w-4" />
-                  {user?.username}
+                  <img
+                    src={getAvatarImage(user?.avatarKey)}
+                    alt={user?.username || 'Profile'}
+                    className="h-6 w-6 rounded-full object-cover border border-slate-700 group-hover:border-indigo-400 transition-colors"
+                  />
+                  <span>{user?.username}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -126,8 +132,13 @@ export default function AppShell() {
             <hr className="border-slate-800" />
             {isAuthenticated ? (
               <>
-                <Link to="/profile" className="text-sm text-slate-300" onClick={() => setMenuOpen(false)}>
-                  Profile ({user?.username})
+                <Link to="/profile" className="flex items-center gap-2.5 text-sm text-slate-300" onClick={() => setMenuOpen(false)}>
+                  <img
+                    src={getAvatarImage(user?.avatarKey)}
+                    alt={user?.username || 'Profile'}
+                    className="h-6 w-6 rounded-full object-cover border border-slate-700"
+                  />
+                  <span>Profile ({user?.username})</span>
                 </Link>
                 {user?.role === 'ADMIN' && (
                   <Link to="/admin" className="text-sm text-amber-400" onClick={() => setMenuOpen(false)}>

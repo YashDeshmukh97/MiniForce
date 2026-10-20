@@ -7,9 +7,6 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-// These must match the vanilla frontend's exact real IDs to preserve sorting
-const REAL_IDS = [1, 2, 3, 8, 12, 13, 14, 20]
-
 export default function ProblemsPage() {
   const { data: allProblems, isLoading, error, refetch } = useApi(() => api.problems.list({}))
 
@@ -31,15 +28,8 @@ export default function ProblemsPage() {
 
     let result = [...allProblems]
 
-    // Sort: REAL problems first, then by ID ascending
-    result.sort((a, b) => {
-      const aIdx = REAL_IDS.indexOf(a.id)
-      const bIdx = REAL_IDS.indexOf(b.id)
-      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx
-      if (aIdx !== -1) return -1
-      if (bIdx !== -1) return 1
-      return a.id - b.id
-    })
+    // Sort by problem ID ascending (1, 2, 3, ... 50)
+    result.sort((a, b) => a.id - b.id)
 
     // Filter by search
     if (search.trim()) {
@@ -76,6 +66,11 @@ export default function ProblemsPage() {
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Problem Catalog</h1>
           <p className="mt-2 text-slate-400">Master algorithms and data structures.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs px-3 py-1 font-medium">
+            50 Problems · Java 17 + Python 3
+          </Badge>
         </div>
       </div>
 
@@ -147,8 +142,11 @@ export default function ProblemsPage() {
                     className="group hover:bg-slate-800/50 transition-colors"
                   >
                     <td className="px-6 py-4 text-center">
-                      {/* Placeholder for solved status if available in future, using opacity-0 to keep width */}
-                      <CheckCircle2 className="h-5 w-5 mx-auto text-emerald-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+                      {p.solved ? (
+                        <CheckCircle2 className="h-5 w-5 mx-auto text-emerald-500" />
+                      ) : (
+                        <CheckCircle2 className="h-5 w-5 mx-auto text-emerald-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -158,11 +156,6 @@ export default function ProblemsPage() {
                         >
                           {p.id}. {p.title}
                         </Link>
-                        {REAL_IDS.includes(p.id) && (
-                          <Badge className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] uppercase tracking-wider py-0 px-1.5 h-4">
-                            Real
-                          </Badge>
-                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -179,8 +172,10 @@ export default function ProblemsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-400">
-                      {Number(p.acceptanceRate || 0).toFixed(1)}%
+                    <td className="px-6 py-4 text-slate-400 font-mono text-xs">
+                      {p.acceptanceRate && p.acceptanceRate > 0
+                        ? `${Number(p.acceptanceRate).toFixed(1)}%`
+                        : '—'}
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant={p.difficulty.toLowerCase() as any}>

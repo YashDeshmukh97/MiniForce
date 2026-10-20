@@ -31,7 +31,7 @@ public class PythonRuntimeIntegrationTest {
             ContainerSpec spec = ContainerSpec.forRuntime(
                 "miniforce_exec_py_" + System.currentTimeMillis(),
                 w.toAbsolutePath().toString().replace("\\", "/"),
-                ResourcePolicy.DEFAULT,
+                ResourcePolicy.TEST_GENEROUS,
                 List.of("python3", "main.py"),
                 null,
                 Map.of("PYTHONDONTWRITEBYTECODE", "1")
@@ -57,7 +57,7 @@ public class PythonRuntimeIntegrationTest {
             ContainerSpec spec = ContainerSpec.forRuntime(
                 "miniforce_exec_py_syn_" + System.currentTimeMillis(),
                 w.toAbsolutePath().toString().replace("\\", "/"),
-                ResourcePolicy.DEFAULT,
+                ResourcePolicy.TEST_GENEROUS,
                 List.of("python3", "main.py"),
                 null,
                 Map.of("PYTHONDONTWRITEBYTECODE", "1")
@@ -82,7 +82,7 @@ public class PythonRuntimeIntegrationTest {
             ContainerSpec spec = ContainerSpec.forRuntime(
                 "miniforce_exec_py_err_" + System.currentTimeMillis(),
                 w.toAbsolutePath().toString().replace("\\", "/"),
-                ResourcePolicy.DEFAULT,
+                ResourcePolicy.TEST_GENEROUS,
                 List.of("python3", "main.py"),
                 null,
                 Map.of("PYTHONDONTWRITEBYTECODE", "1")
@@ -108,7 +108,7 @@ public class PythonRuntimeIntegrationTest {
             ContainerSpec spec = ContainerSpec.forRuntime(
                 "miniforce_exec_py_ro_" + System.currentTimeMillis(),
                 w.toAbsolutePath().toString().replace("\\", "/"),
-                ResourcePolicy.DEFAULT,
+                ResourcePolicy.TEST_GENEROUS,
                 List.of("python3", "main.py"),
                 null,
                 Map.of("PYTHONDONTWRITEBYTECODE", "1")

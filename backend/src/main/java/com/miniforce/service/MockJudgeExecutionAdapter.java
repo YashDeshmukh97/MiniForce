@@ -20,6 +20,10 @@ public class MockJudgeExecutionAdapter implements JudgeExecutionPort {
         if (code.contains("SYSTEM_ERROR_MOCK")) {
             return new ExecutionResult(SubmissionStatus.SYSTEM_ERROR, null, null, null, null, null, "Mock system error");
         }
-        return new ExecutionResult(SubmissionStatus.ACCEPTED, 15, 2048, null, null, null, null);
+        if (code.contains("ACCEPTED_MOCK")) {
+            return new ExecutionResult(SubmissionStatus.ACCEPTED, 15, 2048, null, null, null, null);
+        }
+        
+        return new ExecutionResult(SubmissionStatus.SYSTEM_ERROR, null, null, null, null, null, "This problem does not currently have an executable judge.");
     }
 }

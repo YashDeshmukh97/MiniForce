@@ -12,13 +12,13 @@ class SafeJavaDemoJudgeTest {
     private final SafeJavaDemoJudge judge = new SafeJavaDemoJudge();
 
     @Test
-    void genericProblemsAcceptOnlyTheDocumentedDemoMarker() {
+    void genericProblemsRejectWithSystemErrorNow() {
         String source = "class Solution { // MINIFORCE: ACCEPT public int solve() { return 1; } }";
         var verdict = judge.judge(problem("merge-intervals"), "JAVA_17", source, List.of(testCase()));
 
-        assertEquals(SubmissionStatus.ACCEPTED, verdict.status());
+        assertEquals(SubmissionStatus.SYSTEM_ERROR, verdict.status());
         assertEquals(12 + source.length() % 37, verdict.runtimeMs());
-        assertTrue(verdict.message().contains("no code or test case was executed"));
+        assertTrue(verdict.message().contains("Run mode is disabled"));
     }
 
     @Test
@@ -38,20 +38,20 @@ class SafeJavaDemoJudgeTest {
         String malformed = "class Solution { // MINIFORCE: ACCEPT this is not valid Java at all !!!! }";
         var verdict = judge.judge(problem("coin-change"), "JAVA_17", malformed, List.of());
 
-        assertEquals(SubmissionStatus.ACCEPTED, verdict.status());
+        assertEquals(SubmissionStatus.SYSTEM_ERROR, verdict.status());
     }
 
     @Test
-    void twoSumRuleIsDeterministicAndDoesNotUseTheGenericMarker() {
+    void twoSumRuleIsDeterministicAndReturnsSystemError() {
         String matching = "import java.util.*; class Solution { public int[] twoSum(int[] nums, int target) { HashMap<Integer,Integer> seen = new HashMap<>(); return new int[]{}; } }";
         String markerOnly = "class Solution { // MINIFORCE: ACCEPT public int solve() { return 1; } }";
 
-        assertEquals(SubmissionStatus.ACCEPTED, judge.judge(problem("two-sum"), "JAVA_17", matching, List.of()).status());
-        assertEquals(SubmissionStatus.WRONG_ANSWER, judge.judge(problem("two-sum"), "JAVA_17", markerOnly, List.of()).status());
+        assertEquals(SubmissionStatus.SYSTEM_ERROR, judge.judge(problem("two-sum"), "JAVA_17", matching, List.of()).status());
+        assertEquals(SubmissionStatus.SYSTEM_ERROR, judge.judge(problem("two-sum"), "JAVA_17", markerOnly, List.of()).status());
     }
 
     @Test
-    void basicClassCheckProducesTheOnlyDemoCompilationError() {
+    void basicClassCheckProducesCompilationError() {
         var verdict = judge.judge(problem("merge-intervals"), "JAVA_17", "// MINIFORCE: ACCEPT", List.of());
         assertEquals(SubmissionStatus.COMPILATION_ERROR, verdict.status());
         assertNull(verdict.runtimeMs());

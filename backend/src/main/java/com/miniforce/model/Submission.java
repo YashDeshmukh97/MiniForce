@@ -6,16 +6,16 @@ import jakarta.persistence.*; import java.time.Instant;
  @Column(name="claimed_by", length=100) private String claimedBy; @Column(name="claimed_at") private Instant claimedAt; @Column(name="lease_expires_at") private Instant leaseExpiresAt; @Column(name="retry_count", nullable=false) private Integer retryCount = 0; @Column(name="memory_kb") private Integer memoryKb; @Column(name="compiler_output", columnDefinition="MEDIUMTEXT") private String compilerOutput;
     @Column(name = "failing_test_case_id")
     private Long failingTestCaseId;
-    @Column(name = "runtime_error_output")
+    @Column(name = "runtime_error_output", columnDefinition = "MEDIUMTEXT")
     private String runtimeErrorOutput;
-    @Column(name = "system_error_message")
+    @Column(name = "system_error_message", columnDefinition = "MEDIUMTEXT")
     private String systemErrorMessage;
  public Long getId(){return id;} public User getUser(){return user;} public void setUser(User v){user=v;} public Problem getProblem(){return problem;} public void setProblem(Problem v){problem=v;} public Contest getContest(){return contest;} public void setContest(Contest v){contest=v;} public String getLanguage(){return language;} public void setLanguage(String v){language=v;} public String getCode(){return code;} public void setCode(String v){code=v;} public SubmissionStatus getStatus(){return status;} public void setStatus(SubmissionStatus v){status=v;} public Integer getRuntimeMs(){return runtimeMs;} public void setRuntimeMs(Integer v){runtimeMs=v;} public Instant getSubmittedAt(){return submittedAt;}
  public String getClaimedBy(){return claimedBy;} public void setClaimedBy(String v){claimedBy=v;} public Instant getClaimedAt(){return claimedAt;} public void setClaimedAt(Instant v){claimedAt=v;} public Instant getLeaseExpiresAt(){return leaseExpiresAt;} public void setLeaseExpiresAt(Instant v){leaseExpiresAt=v;} public Integer getRetryCount(){return retryCount;} public void setRetryCount(Integer v){retryCount=v;} public Integer getMemoryKb(){return memoryKb;} public void setMemoryKb(Integer v){memoryKb=v;} public String getCompilerOutput(){return compilerOutput;}
     public Long getFailingTestCaseId() { return failingTestCaseId; }
     public void setFailingTestCaseId(Long id) { this.failingTestCaseId = id; }
     public String getRuntimeErrorOutput() { return runtimeErrorOutput; }
-    public void setRuntimeErrorOutput(String s) { this.runtimeErrorOutput = s; }
+    public void setRuntimeErrorOutput(String s) { this.runtimeErrorOutput = (s != null && s.length() > 65535) ? s.substring(0, 65535) : s; }
     public String getSystemErrorMessage() { return systemErrorMessage; }
-    public void setSystemErrorMessage(String s) { this.systemErrorMessage = s; } public void setCompilerOutput(String v){compilerOutput=v;}
+    public void setSystemErrorMessage(String s) { this.systemErrorMessage = (s != null && s.length() > 65535) ? s.substring(0, 65535) : s; } public void setCompilerOutput(String v){compilerOutput=v;}
 }

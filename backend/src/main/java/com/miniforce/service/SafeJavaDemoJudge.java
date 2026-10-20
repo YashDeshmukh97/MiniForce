@@ -26,7 +26,7 @@ public class SafeJavaDemoJudge {
    case "longest-substring-without-repeating-characters" -> compact.contains("lengthOfLongestSubstring(Strings)") && (compact.contains("HashMap")||compact.contains("Map<")) && compact.contains("Math.max");
    default -> code.contains("// MINIFORCE: ACCEPT");
   };
-  if(accepted) return new Verdict(SubmissionStatus.ACCEPTED,12+(code.length()%37),cases.size(),cases.size(),"Demo pattern accepted; no code or test case was executed.");
-  return new Verdict(SubmissionStatus.WRONG_ANSWER,9+(code.length()%19),0,cases.size(),"Demo pattern did not match; no code or test case was executed.");
+  if(accepted) return new Verdict(SubmissionStatus.SYSTEM_ERROR,12+(code.length()%37),cases.size(),cases.size(),"Run mode is disabled to prevent false verdicts. Use 'Submit' for actual evaluation.");
+  return new Verdict(SubmissionStatus.SYSTEM_ERROR,9+(code.length()%19),0,cases.size(),"Run mode is disabled to prevent false verdicts. Use 'Submit' for actual evaluation.");
  }
 }

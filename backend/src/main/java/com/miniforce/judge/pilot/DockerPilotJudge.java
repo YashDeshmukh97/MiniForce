@@ -25,6 +25,9 @@ public class DockerPilotJudge {
     }
 
     public PilotResult executeTestCase(String language, String sourceCode, String rawInput, String expectedOutput, InputCodec codec, String harnessCode, OutputComparator comparator) {
+        if (codec == null || harnessCode == null || comparator == null) {
+            return new PilotResult("SYSTEM_ERROR", "", "Judge components not configured for language: " + language);
+        }
         Path workspace = null;
         try {
             
@@ -88,8 +91,14 @@ public class DockerPilotJudge {
                 files.put("Main.java", harnessCode);
                 
                 CompilerResult compRes = compilerRunner.compileMultipleInWorkspace(workspace, files);
+                if (compRes.systemError() != null) {
+                    return new PilotResult("SYSTEM_ERROR", compRes.output(), compRes.systemError());
+                }
+                if (compRes.timeout()) {
+                    return new PilotResult("SYSTEM_ERROR", compRes.output(), "Compiler timed out in judge infrastructure.");
+                }
                 if (!compRes.success()) {
-                    return new PilotResult("COMPILATION_ERROR", compRes.output(), compRes.systemError());
+                    return new PilotResult("COMPILATION_ERROR", compRes.output(), null);
                 }
 
                 RuntimeResult runRes = runtimeRunner.run(workspace, "Main", stdinData.getBytes());
@@ -112,7 +121,7 @@ public class DockerPilotJudge {
             }
 
         } catch (Exception e) {
-            return new PilotResult("SYSTEM_ERROR", "", e.getMessage());
+            return new PilotResult("SYSTEM_ERROR", "", e.getMessage() != null ? e.getMessage() : e.toString());
         } finally {
             if (workspace != null) {
                 workspaceManager.cleanup(workspace);

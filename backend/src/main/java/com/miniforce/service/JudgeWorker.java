@@ -32,12 +32,16 @@ public class JudgeWorker {
         log.info("============== JudgeWorker initialized with port: " + executionPort.getClass().getName());
     }
 
+    @org.springframework.beans.factory.annotation.Value("${miniforce.judge.scheduler-enabled:true}")
+    private boolean schedulerEnabled = true;
+
     @Scheduled(fixedDelay = 2000)
     public void pollQueue() {
+        if (!schedulerEnabled) return;
         processNext();
     }
 
-    public void processNext() {
+    public synchronized void processNext() {
         Optional<Submission> job = claimService.claimNextJob();
         if (job.isEmpty()) return;
 

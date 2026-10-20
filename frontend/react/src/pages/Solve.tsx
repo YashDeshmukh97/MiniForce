@@ -1,6 +1,6 @@
 import { Badge, Button, ErrorState, Loading } from '@/components/ui'
 import { api, ApiError } from '@/services/api'
-import type { Language, ProblemDetail, Submission, TestCase } from '@/types'
+import type { Language, ProblemDetail, ProblemHint, Submission, TestCase } from '@/types'
 import { storage } from '@/utils/storage'
 import {
   AlertTriangle,
@@ -31,6 +31,12 @@ export default function SolvePage() {
   const [isLoadingProblem, setIsLoadingProblem] = useState(true)
   const [errorProblem, setErrorProblem] = useState<string | null>(null)
 
+  // Hints state
+  const [hints, setHints] = useState<ProblemHint[]>([])
+  const [revealedHintCount, setRevealedHintCount] = useState(0)
+  const [hintsError, setHintsError] = useState<string | null>(null)
+  const [isLoadingHints, setIsLoadingHints] = useState(false)
+
   // Editor state
   const [language, setLanguage] = useState<Language>('JAVA_17')
   const [code, setCode] = useState('')
@@ -51,6 +57,10 @@ export default function SolvePage() {
     let cancelled = false
     setIsLoadingProblem(true)
     setErrorProblem(null)
+    setHints([])
+    setRevealedHintCount(0)
+    setHintsError(null)
+    setIsLoadingHints(false)
 
     const initData = async () => {
       try {
@@ -63,6 +73,18 @@ export default function SolvePage() {
           if (!cancelled) setTestcases(tcs || [])
         } catch (e) {
           // ignore test case error, display what we have
+        }
+
+        try {
+          const fetchedHints = await api.problems.hints(prob.id)
+          if (!cancelled) {
+            const ordered = [...(fetchedHints || [])].sort((a, b) => a.hintLevel - b.hintLevel)
+            setHints(ordered)
+          }
+        } catch (e) {
+          if (!cancelled) {
+            setHintsError('Hints are currently unavailable.')
+          }
         }
 
         // Initialize editor with Java draft or starter code
@@ -83,6 +105,30 @@ export default function SolvePage() {
     }
   }, [slug])
 
+  const handleRevealNextHint = async () => {
+    if (!problem) return
+    if (hints.length === 0 && !hintsError) {
+      setIsLoadingHints(true)
+      try {
+        const fetchedHints = await api.problems.hints(problem.id)
+        const ordered = [...(fetchedHints || [])].sort((a, b) => a.hintLevel - b.hintLevel)
+        if (ordered.length === 0) {
+          setHintsError('Hints are currently unavailable.')
+          return
+        }
+        setHints(ordered)
+        setRevealedHintCount(1)
+      } catch {
+        setHintsError('Hints are currently unavailable.')
+      } finally {
+        setIsLoadingHints(false)
+      }
+      return
+    }
+    if (hintsError || hints.length === 0) return
+    setRevealedHintCount(prev => Math.min(prev + 1, hints.length))
+  }
+
   // Timer
   useEffect(() => {
     const started = Date.now()
@@ -92,11 +138,23 @@ export default function SolvePage() {
     return () => clearInterval(interval)
   }, [])
 
+  const isLanguageSupported = (lang: Language): boolean => {
+    if (!problem) return false
+    if (problem.supportedLanguages && problem.supportedLanguages.length > 0) {
+      return problem.supportedLanguages.includes(lang)
+    }
+    // Public problems 1..50 support both JAVA_17 and PYTHON_3
+    if (problem.id >= 1 && problem.id <= 50) {
+      return lang === 'JAVA_17' || lang === 'PYTHON_3'
+    }
+    return lang === 'JAVA_17'
+  }
+
   // Auto-save draft on code change
   useEffect(() => {
     if (!problem || !code) return
-    // We only save if it's an active typing session (not when disabled for unsupported python)
-    if (language === 'PYTHON_3' && !problem.starterCodePython) return
+    if (code.includes('Python support is not available for this problem yet')) return
+    if (!isLanguageSupported(language)) return
 
     if (language === 'PYTHON_3') {
       storage.setPythonDraft(problem.id, code)
@@ -110,15 +168,21 @@ export default function SolvePage() {
     const newLang = e.target.value as Language
     setLanguage(newLang)
 
-    const draft = newLang === 'PYTHON_3' 
+    const isSupported = isLanguageSupported(newLang)
+    const rawDraft = newLang === 'PYTHON_3' 
       ? storage.getPythonDraft(problem.id) 
       : storage.getJavaDraft(problem.id)
+
+    // Discard any stale placeholder draft that was saved previously
+    const draft = rawDraft && rawDraft.includes('Python support is not available for this problem yet')
+      ? null
+      : rawDraft
     
     if (newLang === 'PYTHON_3') {
-      if (!problem.starterCodePython) {
+      if (!isSupported) {
         setCode(draft || '# Python support is not available for this problem yet.')
       } else {
-        setCode(draft || problem.starterCodePython || '')
+        setCode(draft || problem.starterCodePython || '# Write your Python 3 solution here\n')
       }
     } else {
       setCode(draft || problem.starterCode || '')
@@ -182,7 +246,7 @@ export default function SolvePage() {
     )
   }
 
-  const isPythonUnsupported = language === 'PYTHON_3' && !problem.starterCodePython
+  const isPythonUnsupported = language === 'PYTHON_3' && !isLanguageSupported('PYTHON_3')
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row bg-[#0b0f19]">
@@ -237,7 +301,7 @@ export default function SolvePage() {
           </div>
 
           {problem.constraintsText && (
-            <div className="mt-2 mb-8">
+            <div className="mt-2">
               <h2 className="text-lg font-semibold text-slate-100 mb-4 border-b border-slate-800/50 pb-2">Constraints</h2>
               <div className="bg-amber-500/5 border border-amber-500/10 rounded-lg p-4">
                 <div className="text-amber-200/80 font-mono text-sm whitespace-pre-wrap leading-relaxed">
@@ -246,6 +310,64 @@ export default function SolvePage() {
               </div>
             </div>
           )}
+
+          {/* ── Progressive Hints Section ──────────────────────────────────── */}
+          <div className="mt-2 mb-8">
+            <h2 className="text-lg font-semibold text-slate-100 mb-4 border-b border-slate-800/50 pb-2">Hints</h2>
+            {hintsError ? (
+              <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-400">
+                Hints are currently unavailable.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {revealedHintCount > 0 && (
+                  <div className="flex flex-col gap-3">
+                    {hints.slice(0, revealedHintCount).map((hint) => (
+                      <div
+                        key={hint.hintLevel}
+                        className="bg-[#161b22] border border-indigo-500/20 rounded-lg p-4"
+                      >
+                        <div className="text-xs font-bold text-indigo-400 mb-1.5 uppercase tracking-wider">
+                          Hint {hint.hintLevel} of {hints.length || 3}
+                        </div>
+                        <p className="text-sm text-slate-300 leading-relaxed">
+                          {hint.hintText}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  {revealedHintCount === 0 ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleRevealNextHint}
+                      disabled={isLoadingHints}
+                      className="text-xs font-semibold"
+                    >
+                      💡 Get Hint
+                    </Button>
+                  ) : revealedHintCount < (hints.length || 3) ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleRevealNextHint}
+                      disabled={isLoadingHints}
+                      className="text-xs font-semibold"
+                    >
+                      Show Next Hint
+                    </Button>
+                  ) : (
+                    <span className="text-xs font-medium text-slate-500 italic">
+                      No more hints available.
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

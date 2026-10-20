@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { api } from '@/services/api'
 import type { DiscussionSummary, DiscussionDetail } from '@/types'
 import { useAuth } from '@/context/AuthContext'
@@ -9,6 +9,7 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { getAvatarImage } from '@/config/avatars'
 
 const fmt = (dateStr: string) =>
   new Intl.DateTimeFormat(undefined, {
@@ -29,6 +30,7 @@ export default function DiscussPage() {
 
 function DiscussionListView() {
   const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const [discussions, setDiscussions] = useState<DiscussionSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -56,7 +58,7 @@ function DiscussionListView() {
 
     try {
       const created = await api.discussions.create({ title, body })
-      window.location.href = `/discuss?id=${created.id}`
+      navigate(`/discuss?id=${created.id}`)
     } catch (err: unknown) {
       setSubmitError(err instanceof Error ? err.message : 'Error creating discussion')
       setIsSubmitting(false)
@@ -66,11 +68,11 @@ function DiscussionListView() {
   return (
     <main className="max-w-6xl mx-auto py-12 px-4 lg:px-8">
       <header className="mb-12 text-center">
-        <div className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2">
+        <div className="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-2">
           Community Knowledge
         </div>
         <h1 className="text-4xl font-extrabold text-slate-100 tracking-tight">
-          Ask. Share. <span className="text-blue-500">Solve together.</span>
+          Ask. Share. <span className="text-indigo-400">Solve together.</span>
         </h1>
         <p className="mt-4 text-slate-400 max-w-2xl mx-auto text-lg">
           Exchange approaches, post clean solutions and help fellow coders get
@@ -82,7 +84,7 @@ function DiscussionListView() {
         <div className="lg:col-span-3 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div className="flex gap-4">
-              <button className="text-slate-100 font-semibold border-b-2 border-blue-500 pb-4 -mb-[17px]">
+              <button className="text-slate-100 font-semibold border-b-2 border-indigo-500 pb-4 -mb-[17px]">
                 Recent
               </button>
             </div>
@@ -103,7 +105,7 @@ function DiscussionListView() {
             >
               {!isAuthenticated ? (
                 <div className="text-center py-4 text-slate-400">
-                  Please <Link to="/login" className="text-blue-400 hover:underline">log in</Link> to create a discussion.
+                  Please <Link to="/login" className="text-indigo-400 hover:underline">log in</Link> to create a discussion.
                 </div>
               ) : (
                 <>
@@ -122,7 +124,7 @@ function DiscussionListView() {
                       maxLength={10000}
                       rows={4}
                       placeholder="Share a question, solution idea, or useful hint"
-                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 resize-y"
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 resize-y"
                       value={body}
                       onChange={(e) => setBody(e.target.value)}
                     />
@@ -161,7 +163,7 @@ function DiscussionListView() {
                 >
                   <div className="flex-shrink-0">
                     <img
-                      src={`/frontend/assets/avatars/${d.authorAvatarKey || 'avatar_default'}.svg`}
+                      src={getAvatarImage(d.authorAvatarKey)}
                       alt=""
                       className="w-12 h-12 rounded-full border border-slate-700 bg-slate-800"
                     />
@@ -170,7 +172,7 @@ function DiscussionListView() {
                     <h3 className="text-lg font-bold text-slate-100 mb-1 line-clamp-1">
                       <Link
                         to={`/discuss?id=${d.id}`}
-                        className="hover:text-blue-400 focus:outline-none focus:underline"
+                        className="hover:text-indigo-400 focus:outline-none focus:underline"
                       >
                         {d.title}
                       </Link>
@@ -179,7 +181,7 @@ function DiscussionListView() {
                       {d.body}
                     </p>
                     <div className="flex items-center gap-4 text-xs font-medium text-slate-500">
-                      <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded">
+                      <span className="px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded">
                         Community
                       </span>
                       <span>{fmt(d.createdAt)}</span>
@@ -203,7 +205,7 @@ function DiscussionListView() {
                   <a
                     key={topic}
                     href="#"
-                    className="text-slate-400 hover:text-blue-400 transition-colors"
+                    className="text-slate-400 hover:text-indigo-400 transition-colors"
                   >
                     {topic}
                   </a>
@@ -280,7 +282,7 @@ function DiscussionDetailView({ id }: { id: number }) {
   if (error || !detail) {
     return (
       <div className="max-w-3xl mx-auto py-12 px-4">
-        <Link to="/discuss" className="text-blue-400 hover:underline mb-6 inline-block">
+        <Link to="/discuss" className="text-indigo-400 hover:underline mb-6 inline-block">
           ← All discussions
         </Link>
         <ErrorState message={error || 'Discussion not found'} />
@@ -292,7 +294,7 @@ function DiscussionDetailView({ id }: { id: number }) {
     <main className="max-w-3xl mx-auto py-12 px-4 lg:px-8">
       <Link
         to="/discuss"
-        className="text-slate-400 hover:text-blue-400 font-medium transition-colors mb-8 inline-block"
+        className="text-slate-400 hover:text-indigo-400 font-medium transition-colors mb-8 inline-block"
       >
         ← All discussions
       </Link>
@@ -306,7 +308,7 @@ function DiscussionDetailView({ id }: { id: number }) {
         </p>
         <div className="flex items-center gap-4 text-sm text-slate-500 border-t border-slate-800 pt-6">
           <img
-            src={`/frontend/assets/avatars/${detail.authorAvatarKey || 'avatar_default'}.svg`}
+            src={getAvatarImage(detail.authorAvatarKey)}
             alt=""
             className="w-8 h-8 rounded-full border border-slate-700 bg-slate-800"
           />
@@ -354,7 +356,7 @@ function DiscussionDetailView({ id }: { id: number }) {
         <h4 className="font-semibold text-slate-200 mb-4">Add a reply</h4>
         {!isAuthenticated ? (
           <div className="text-slate-400">
-            Please <Link to="/login" className="text-blue-400 hover:underline">log in</Link> to reply.
+            Please <Link to="/login" className="text-indigo-400 hover:underline">log in</Link> to reply.
           </div>
         ) : (
           <form onSubmit={handleReply} className="space-y-4">
@@ -363,7 +365,7 @@ function DiscussionDetailView({ id }: { id: number }) {
               maxLength={5000}
               rows={4}
               placeholder="Add a helpful reply"
-              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 resize-y"
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 resize-y"
               value={replyBody}
               onChange={(e) => setReplyBody(e.target.value)}
             />

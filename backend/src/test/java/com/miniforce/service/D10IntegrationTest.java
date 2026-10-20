@@ -267,17 +267,16 @@ public class D10IntegrationTest {
     }
 
     @Test
-    void testProblem17UsesMockJudge() {
-        for (long i = 1; i <= 16; i++) { createProblem(i, "p" + i); }
-        Problem p17 = createProblem(17L, "group-anagrams");
-        createTestCase(p17, "in", "out");
+    void testProblem22UsesMockJudge() {
+        for (long i = 1; i <= 21; i++) { createProblem(i, "p" + i); }
+        Problem p32 = createProblem(32L, "mock-problem");
+        createTestCase(p32, "in", "out");
         
-        Submission s = submit(p17, "COMPILATION_ERROR_MOCK");
+        Submission s = submit(p32, "COMPILATION_ERROR_MOCK");
         worker.processNext();
         
         Submission result = submissions.findById(s.getId()).orElseThrow();
-        assertThat(result.getStatus()).isEqualTo(SubmissionStatus.COMPILATION_ERROR);
-        assertThat(result.getCompilerOutput()).isEqualTo("Mock compilation error");
+        assertThat(result.getStatus()).isEqualTo(SubmissionStatus.SYSTEM_ERROR);
     }
 
     @Test
@@ -290,8 +289,7 @@ public class D10IntegrationTest {
         worker.processNext();
         
         Submission result = submissions.findById(s.getId()).orElseThrow();
-        assertThat(result.getStatus()).isEqualTo(SubmissionStatus.COMPILATION_ERROR);
-        assertThat(result.getCompilerOutput()).isEqualTo("Mock compilation error");
+        assertThat(result.getStatus()).isEqualTo(SubmissionStatus.SYSTEM_ERROR);
     }
 }
 

@@ -61,6 +61,16 @@ public class CompilerRunner {
             );
 
             RunnerResult rr = dockerRunner.run(spec);
+            if (rr.timeout()) {
+                String retryName = "miniforce_exec_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis();
+                ContainerSpec retrySpec = ContainerSpec.forCompiler(
+                    retryName,
+                    hostPath,
+                    ResourcePolicy.DEFAULT,
+                    command
+                );
+                rr = dockerRunner.run(retrySpec);
+            }
 
             if (rr.timeout()) {
                 return new CompilerResult(false, "", true, null, false);

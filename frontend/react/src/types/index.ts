@@ -34,7 +34,8 @@ export interface ProblemSummary {
   difficulty: Difficulty
   topics: string[]
   acceptanceRate: number
-  isPublic: boolean
+  isPublic?: boolean
+  solved?: boolean
 }
 
 export interface ProblemDetail extends ProblemSummary {
@@ -42,6 +43,7 @@ export interface ProblemDetail extends ProblemSummary {
   constraintsText: string | null
   starterCode: string
   starterCodePython: string | null
+  supportedLanguages?: string[]
 }
 
 export interface TestCase {
@@ -49,6 +51,13 @@ export interface TestCase {
   problemId: number
   inputData: string
   expectedOutput: string
+}
+
+export interface ProblemHint {
+  id: number
+  problemId: number
+  hintLevel: number
+  hintText: string
 }
 
 // ─── Submissions ──────────────────────────────────────────────────────────────

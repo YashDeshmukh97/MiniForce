@@ -33,7 +33,9 @@ class SubmissionServiceTest {
         contests = mock(ContestRepository.class);
         contestProblems = mock(ContestProblemRepository.class);
         participants = mock(ContestParticipantRepository.class);
-        service = new SubmissionService(submissions, problems, cases, contests, contestProblems, participants, new SafeJavaDemoJudge());
+        JudgeExecutionRouter router = mock(JudgeExecutionRouter.class);
+        when(router.execute(any())).thenReturn(new com.miniforce.judge.ExecutionResult(SubmissionStatus.SYSTEM_ERROR, null, null, null, null, null, null));
+        service = new SubmissionService(submissions, problems, cases, contests, contestProblems, participants, router);
         problem = new Problem();
         ReflectionTestUtils.setField(problem, "id", 100L);
         problem.setSlug("inversion-network-analyst");
@@ -50,7 +52,7 @@ class SubmissionServiceTest {
         var response = service.run(user, request(null));
 
         assertNull(response.id());
-        assertEquals(SubmissionStatus.ACCEPTED, response.status());
+        assertEquals(SubmissionStatus.SYSTEM_ERROR, response.status());
         verify(submissions, never()).save(any());
     }
 
@@ -61,12 +63,12 @@ class SubmissionServiceTest {
 
         var response = service.submit(user, request(null));
 
-        assertEquals(SubmissionStatus.ACCEPTED, response.status());
+        assertEquals(SubmissionStatus.SYSTEM_ERROR, response.status());
         ArgumentCaptor<Submission> saved = ArgumentCaptor.forClass(Submission.class);
         verify(submissions).save(saved.capture());
         assertEquals("JAVA_17", saved.getValue().getLanguage());
         assertTrue(saved.getValue().getCode().contains("MINIFORCE: ACCEPT"));
-        assertEquals(1, user.getSolvedCount());
+        assertEquals(0, user.getSolvedCount());
     }
 
     @Test

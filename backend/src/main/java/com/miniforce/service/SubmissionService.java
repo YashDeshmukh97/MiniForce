@@ -1,9 +1,9 @@
 package com.miniforce.service;
-import com.miniforce.dto.SubmissionDtos.*; import com.miniforce.exception.*; import com.miniforce.model.*; import com.miniforce.repository.*; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional; import java.util.*; import java.time.*;
+import com.miniforce.dto.SubmissionDtos.*; import com.miniforce.exception.*; import com.miniforce.model.*; import com.miniforce.repository.*; import com.miniforce.judge.*; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional; import java.util.*; import java.time.*;
 
 @Service public class SubmissionService {
- private final SubmissionRepository submissions;private final ProblemService problems;private final TestCaseRepository cases;private final ContestRepository contests;private final ContestProblemRepository contestProblems;private final ContestParticipantRepository participants;private final SafeJavaDemoJudge judge;
- public SubmissionService(SubmissionRepository s,ProblemService p,TestCaseRepository t,ContestRepository c,ContestProblemRepository cp,ContestParticipantRepository pa,SafeJavaDemoJudge j){submissions=s;problems=p;cases=t;contests=c;contestProblems=cp;participants=pa;judge=j;}
+ private final SubmissionRepository submissions;private final ProblemService problems;private final TestCaseRepository cases;private final ContestRepository contests;private final ContestProblemRepository contestProblems;private final ContestParticipantRepository participants;private final JudgeExecutionRouter router;
+ public SubmissionService(SubmissionRepository s,ProblemService p,TestCaseRepository t,ContestRepository c,ContestProblemRepository cp,ContestParticipantRepository pa,JudgeExecutionRouter r){submissions=s;problems=p;cases=t;contests=c;contestProblems=cp;participants=pa;router=r;}
   public void applySuccessEffects(Submission s) {
       User user = s.getUser();
       Problem problem = s.getProblem();
@@ -40,7 +40,11 @@ import com.miniforce.dto.SubmissionDtos.*; import com.miniforce.exception.*; imp
   }
 
   @Transactional public SubmissionResponse submit(User user,SubmissionRequest request){Problem problem=problems.entity(request.problemId()); Contest contest=null;if(request.contestId()!=null){contest=contests.findById(request.contestId()).orElseThrow(()->new NotFoundException("Contest not found"));if(!participants.existsByContestIdAndUserId(contest.getId(),user.getId()))throw new ConflictException("Join the contest before submitting to it");if(contest.getStatus()!=ContestStatus.LIVE)throw new ConflictException("Contest is not currently live");}
-   var verdict=judge.judge(problem,request.language(),request.code(),cases.findByProblemId(problem.getId()));Submission s=new Submission();s.setUser(user);s.setProblem(problem);s.setContest(contest);s.setLanguage(request.language());s.setCode(request.code());s.setStatus(verdict.status());s.setRuntimeMs(verdict.runtimeMs());
+   List<TestCaseRequest> tcRequests = cases.findByProblemId(problem.getId()).stream().map(tc -> new TestCaseRequest(tc.getId(), tc.getInputData(), tc.getExpectedOutput())).toList();
+   ProblemContract contract = new ProblemContract(null, 2000, 256000, 1024, tcRequests);
+   ExecutionRequest req = new ExecutionRequest(-1L, problem.getId(), request.language(), request.code(), contract);
+   ExecutionResult verdict = router.execute(req);
+   Submission s=new Submission();s.setUser(user);s.setProblem(problem);s.setContest(contest);s.setLanguage(request.language());s.setCode(request.code());s.setStatus(verdict.status());s.setRuntimeMs(verdict.runtimeMs() != null ? verdict.runtimeMs() : 0);
    submissions.save(s);
    if(verdict.status()==SubmissionStatus.ACCEPTED){ applySuccessEffects(s); }
    return SubmissionResponse.from(s);
@@ -66,7 +70,14 @@ import com.miniforce.dto.SubmissionDtos.*; import com.miniforce.exception.*; imp
   return SubmissionResponse.from(s);
  }
 
- @Transactional(readOnly=true) public SubmissionResponse run(User user,SubmissionRequest request){Problem problem=problems.entity(request.problemId());List<TestCase> sampleCases=cases.findByProblemId(problem.getId()).stream().filter(TestCase::isSampleCase).toList();var verdict=judge.judge(problem,request.language(),request.code(),sampleCases);return new SubmissionResponse(null,problem.getId(),problem.getTitle(),user.getId(),user.getUsername(),null,request.language(),verdict.status(),verdict.runtimeMs(),Instant.now(),null,null,null);}
+ @Transactional(readOnly=true) public SubmissionResponse run(User user,SubmissionRequest request){
+     Problem problem=problems.entity(request.problemId());
+     List<TestCaseRequest> tcRequests=cases.findByProblemId(problem.getId()).stream().filter(TestCase::isSampleCase).map(tc -> new TestCaseRequest(tc.getId(), tc.getInputData(), tc.getExpectedOutput())).toList();
+     ProblemContract contract = new ProblemContract(null, 2000, 256000, 1024, tcRequests);
+     ExecutionRequest req = new ExecutionRequest(-1L, problem.getId(), request.language(), request.code(), contract);
+     ExecutionResult verdict = router.execute(req);
+     return new SubmissionResponse(null,problem.getId(),problem.getTitle(),user.getId(),user.getUsername(),null,request.language(),verdict.status(),verdict.runtimeMs() != null ? verdict.runtimeMs() : 0,Instant.now(),verdict.compilerOutput(),verdict.runtimeErrorOutput(),verdict.systemErrorMessage());
+ }
  @Transactional(readOnly=true) public List<SubmissionResponse> all(User user){return submissions.findByUserIdOrderBySubmittedAtDesc(user.getId()).stream().map(SubmissionResponse::from).toList();} 
  @Transactional(readOnly=true) public List<SubmissionResponse> forProblem(Long id,User viewer){problems.entity(id);return submissions.findByProblemIdOrderBySubmittedAtDesc(id).stream().filter(s->s.getUser().getId().equals(viewer.getId())||viewer.getRole()==Role.ADMIN).map(SubmissionResponse::from).toList();}
  

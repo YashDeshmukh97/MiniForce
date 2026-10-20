@@ -6,11 +6,13 @@ import com.miniforce.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional
 public class D13AvatarTest {
     @Autowired
@@ -42,6 +44,7 @@ public class D13AvatarTest {
         var resp = userService.updateAvatar(u, new UpdateAvatarRequest("fox_01"));
         assertEquals("fox_01", resp.avatarKey());
         assertEquals("fox_01", u.getAvatarKey());
+        assertEquals("fox_01", userRepository.findById(u.getId()).orElseThrow().getAvatarKey());
     }
     
     @Test
