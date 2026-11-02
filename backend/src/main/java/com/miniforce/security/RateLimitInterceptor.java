@@ -30,7 +30,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     @Value("${miniforce.rate-limit.auth.window-seconds:60}")
     private int authWindowSeconds;
 
-    @Value("${miniforce.rate-limit.submission.requests:5}")
+    @Value("${miniforce.rate-limit.submission.requests:0}")
     private int subMaxRequests;
 
     @Value("${miniforce.rate-limit.submission.window-seconds:60}")
@@ -52,9 +52,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 reject(request, response);
                 return false;
             }
-        } else if (path.startsWith("/api/submissions/run")
+        } else if (subMaxRequests > 0 && (path.startsWith("/api/submissions/run")
                 || path.startsWith("/api/submissions/async")
-                || (path.equals("/api/submissions") && "POST".equalsIgnoreCase(request.getMethod()))) {
+                || (path.equals("/api/submissions") && "POST".equalsIgnoreCase(request.getMethod())))) {
             String key = request.getRemoteAddr();
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof User u) {

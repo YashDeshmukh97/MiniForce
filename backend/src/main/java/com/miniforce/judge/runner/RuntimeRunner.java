@@ -39,6 +39,17 @@ public class RuntimeRunner {
             );
 
             RunnerResult rr = dockerRunner.run(spec);
+            if (rr.timeout()) {
+                String retryName = "miniforce_exec_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis();
+                ContainerSpec retrySpec = ContainerSpec.forRuntime(
+                    retryName,
+                    hostPath,
+                    ResourcePolicy.DEFAULT,
+                    List.of("java", className),
+                    stdin
+                );
+                rr = dockerRunner.run(retrySpec);
+            }
 
             if (rr.timeout()) {
                 return new RuntimeResult(false, "", "", -1, true, null, rr.durationMs(), rr.outputTruncated());

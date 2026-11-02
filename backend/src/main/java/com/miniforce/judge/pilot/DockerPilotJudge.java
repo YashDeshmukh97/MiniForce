@@ -64,6 +64,18 @@ public class DockerPilotJudge {
                 );
 
                 com.miniforce.judge.runner.RunnerResult runRes = runtimeRunner.getDockerRunner().run(spec);
+                if (runRes.timeout()) {
+                    String retryName = "miniforce_exec_" + java.util.UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis();
+                    com.miniforce.judge.runner.ContainerSpec retrySpec = com.miniforce.judge.runner.ContainerSpec.forRuntime(
+                        retryName,
+                        hostPath,
+                        com.miniforce.judge.runner.ResourcePolicy.DEFAULT,
+                        java.util.List.of("python3", "main.py"),
+                        stdinData.getBytes(),
+                        Map.of("PYTHONDONTWRITEBYTECODE", "1")
+                    );
+                    runRes = runtimeRunner.getDockerRunner().run(retrySpec);
+                }
                 
                 if (runRes.systemError() != null) {
                     return new PilotResult("SYSTEM_ERROR", runRes.stderr(), runRes.systemError());

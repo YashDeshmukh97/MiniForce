@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 public class MockJudgeExecutionAdapter implements JudgeExecutionPort {
     @Override
     public ExecutionResult execute(ExecutionRequest request) {
+        if (request.contract() == null || request.contract().testCases() == null || request.contract().testCases().isEmpty()) {
+            return new ExecutionResult(SubmissionStatus.SYSTEM_ERROR, null, null, null, null, null, "Problem has no formal test cases. Cannot execute.");
+        }
         // Deterministic mock logic for tests. NOT invoking java/javac.
         String code = request.sourceCode();
         if (code.contains("COMPILATION_ERROR_MOCK")) {

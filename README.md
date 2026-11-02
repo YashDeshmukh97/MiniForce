@@ -69,83 +69,53 @@ Result Persistence (MySQL)
 *Note: Only the explicitly configured real-judge problems execute user code inside the isolated Docker sandbox. Other problems fallback to a deterministic mock/demo judge.*
 
 ## Real Judge Problems
-MiniForce currently features full real-judge integration (compilation and sandbox execution) for the following problems:
-
-1. Two Sum (Java, Python)
-2. Valid Parentheses (Java, Python)
-3. Longest Substring Without Repeating Characters (Java, Python)
-8. Best Time to Buy and Sell Stock (Java, Python)
-12. Climbing Stairs (Java, Python)
-13. Product of Array Except Self (Java, Python)
-14. Maximum Subarray (Java, Python)
-20. Longest Consecutive Sequence (Java, Python)
+MiniForce features full real-judge integration (compilation and sandbox execution) across all 50 canonical public problems (IDs 1–50) in both **Java 17** and **Python 3**. Every problem runs in a dedicated, isolated Docker sandbox container (`miniforce-judge:latest`) with strict security constraints (`--network none`, 512MB RAM, 128 PIDs, 2.0s execution timeout).
 
 ## Project Structure
 - `frontend/react/` - The React Vite application.
 - `backend/` - The Spring Boot application.
 - `database/` - MySQL schema and migration files.
-- `docs/` - System architecture and deployment documentation.
-- `.env` - Environment variable configuration for Compose.
+- `docs/` - System architecture, audit manifests, and deployment documentation.
 - `docker-compose.yml` - Production container layout.
-- `START-MINIFORCE.bat` / `STOP-MINIFORCE.bat` - Local development orchestration scripts.
+- `START-MINIFORCE.bat` / `STOP-MINIFORCE.bat` - Local demonstration and development orchestration scripts.
 
 ## Requirements
 To run MiniForce locally, you will need:
 - Git
-- Java 17
-- Maven 3.9+
-- Node.js (20+)
-- npm
+- Java 17 or newer
+- Apache Maven 3.8+
+- Node.js (18+) & npm
 - MySQL 8.0+
-- Docker Desktop (Required for real judge execution)
+- Docker Desktop (Linux container engine active for real judging)
 
-## Installation
-Clone the repository to your local machine:
-```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
-cd miniforce4
-```
+## Running MiniForce
 
-### Frontend Setup
-To run the modern React frontend:
+### Recommended: One-Click Demo Launcher
+To start the entire platform for demonstrations or local development:
+- Run **`START-MINIFORCE.bat`** from the project root.
+  - Verifies Java 17+, Maven, Node, npm, MySQL (3306), and Docker Desktop.
+  - Verifies or automatically builds the `miniforce-judge:latest` sandbox container.
+  - Starts the Spring Boot API (port 8080) and applies all database migrations safely.
+  - Starts the React frontend (port 5173) with local reverse proxy to API.
+  - Polls for actual HTTP readiness rather than relying on arbitrary sleep delays.
+  - Configures unlimited runs and submissions for authentic evaluation.
+- Run **`STOP-MINIFORCE.bat`** to safely terminate only the MiniForce processes, containers, and temporary workspaces without touching unrelated host software.
+
+### Manual Setup
+
+#### Frontend Setup
 ```bash
 cd frontend/react
 npm install
 npm run dev
 ```
 
-### Backend Setup
-The Spring Boot backend requires a MySQL database and specific environment variables. Development and production configurations are separated via Spring profiles.
-
-### Database Setup
-A running MySQL 8.0 instance is required. 
-*Note: Production uses `ddl-auto=validate`. You must load the initial schema (`database/miniforce.sql`) manually or rely on the configured flyway/migrations if enabled; it will not auto-generate production tables.*
-
-### Docker Judge Setup
-To use the real judge, Docker Desktop MUST be running on your host machine. The backend orchestrates dynamic sandboxes based on the `miniforce-judge:latest` image.
-**Sandbox Security Controls:**
-- Network isolation (`--network none`)
-- Read-only root filesystem (`--read-only`)
-- Writable scratch space (`--tmpfs /tmp`)
-- Non-root execution (`--user 1000:1000`)
-- CPU, memory, and PID limits
-
-## Running MiniForce
-For local development, you can quickly spin up the backend API and database connection using the provided automation scripts (if configured for your local paths):
-- Run `START-MINIFORCE.bat` to boot the environment.
-- Run `STOP-MINIFORCE.bat` to gracefully terminate.
-
-## Environment Variables
-The following environment variables configure the application:
-- `MINIFORCE_DB_URL`
-- `MINIFORCE_DB_USER`
-- `MINIFORCE_DB_PASSWORD`
-- `MINIFORCE_JWT_SECRET`
-- `MINIFORCE_FRONTEND_ORIGIN`
-- `MINIFORCE_JUDGE_REAL_ENABLED`
-- `VITE_API_BASE` (Frontend build-time API target)
-
-**🚨 IMPORTANT SECURITY WARNING:** NEVER commit `.env`, `.env.production`, passwords, JWT secrets, API keys, SSH private keys, or database dumps to version control.
+#### Backend Setup
+Ensure your local MySQL instance is running with the `miniforce` database. Set the required environment variables (`MINIFORCE_JWT_SECRET`, `MINIFORCE_DB_PASSWORD`) and run:
+```bash
+cd backend
+mvn spring-boot:run
+```
 
 ## Testing
 To validate the application build and run regression tests:
@@ -155,7 +125,7 @@ To validate the application build and run regression tests:
 cd backend
 mvn test
 ```
-*Current Baseline:* 92 backend tests passing (0 failures, 0 errors).
+*Current Baseline:* 480+ backend tests passing (0 failures, 0 errors, 0 skipped), including all 50 problems verified in real Docker sandbox.
 
 **Frontend Build:**
 ```bash
