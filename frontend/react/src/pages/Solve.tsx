@@ -1,4 +1,4 @@
-import { Badge, Button, ErrorState, Loading } from '@/components/ui'
+import { Badge, Button, CodeEditor, ErrorState, Loading } from '@/components/ui'
 import { api, ApiError } from '@/services/api'
 import type { Language, ProblemDetail, ProblemHint, Submission, TestCase } from '@/types'
 import { storage } from '@/utils/storage'
@@ -414,11 +414,12 @@ export default function SolvePage() {
             {language === 'JAVA_17' ? 'Solution.java' : 'solution.py'}
             <span className="ml-auto text-[10px] uppercase tracking-wider text-slate-500">Draft saved locally</span>
           </div>
-          <textarea
+          <CodeEditor
             className="flex-1 w-full bg-transparent text-slate-200 font-mono text-sm leading-relaxed p-4 resize-none focus:outline-none custom-scrollbar"
             spellCheck={false}
             value={code}
-            onChange={e => setCode(e.target.value)}
+            onChange={setCode}
+            language={language}
             disabled={isPythonUnsupported}
             aria-label="Code editor"
             placeholder="Write your solution here..."
