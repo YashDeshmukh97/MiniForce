@@ -43,7 +43,10 @@ export class ApiError extends Error {
 }
 
 function resolveBaseUrl(): string {
-  const raw = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE || '/api') as string
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return '/api'
+  }
+  const raw = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE || 'https://backend-production-97c2.up.railway.app/api') as string
   const trimmed = raw.trim().replace(/\/+$/, '')
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`

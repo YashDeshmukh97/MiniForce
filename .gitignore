@@ -30,3 +30,7 @@ logs/
 !database/miniforce.sql
 !database/migrations/*.sql
 !backend/src/main/resources/*.sql
+
+# Local binaries and tools
+tools/
+*.exe
