@@ -11,6 +11,8 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
 
 @Component
 @Order(1)
@@ -39,6 +41,14 @@ public class DatabaseBaselineInitializer implements ApplicationRunner {
                 log.info("Baseline seed completed successfully. Total problems: {}", problemRepository.count());
             } else {
                 log.info("Database baseline already initialized with {} problems.", count);
+            }
+
+            // Ensure canonical public visibility: 1..50 are public practice problems, 51..100 are admin problems
+            try (Connection conn = dataSource.getConnection();
+                 Statement stmt = conn.createStatement()) {
+                stmt.execute("UPDATE problems SET is_public = TRUE WHERE id <= 50");
+                stmt.execute("UPDATE problems SET is_public = FALSE WHERE id > 50");
+                log.info("Public visibility verified for problems 1..50.");
             }
         } catch (Exception e) {
             log.warn("Database baseline check/initialization notice: {}", e.getMessage());
