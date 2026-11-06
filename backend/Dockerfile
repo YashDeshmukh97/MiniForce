@@ -10,7 +10,9 @@ FROM eclipse-temurin:17-jre-alpine
 
 # Create a non-root user for security and install docker CLI
 RUN apk add --no-cache docker-cli && \
-    addgroup -S spring && adduser -S spring -G spring -G docker
+    addgroup -S docker && \
+    addgroup -S spring && \
+    adduser -S spring -G spring -G docker
 
 # Set working directory
 WORKDIR /app
