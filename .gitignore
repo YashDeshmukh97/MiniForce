@@ -29,3 +29,4 @@ logs/
 *.sql
 !database/miniforce.sql
 !database/migrations/*.sql
+!backend/src/main/resources/*.sql
